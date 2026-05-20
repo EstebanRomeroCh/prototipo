@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Categorías</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f5f5f5;
+    }
+    h1, h2 {
+      color: #2c3e50;
+    }
+    form, table {
+      background-color: #fff;
+      padding: 15px;
+      margin-bottom: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    input {
+      margin-bottom: 10px;
+      padding: 8px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #2980b9;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1c5980;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Registrar Nueva Categoría</h1>
+  <button onclick="window.history.back()">⬅ Volver</button><br><br>
+
+  <form id="formCategoria">
+    <input type="text" id="nombreCategoria" placeholder="Nombre de la categoría" required>
+    <input type="text" id="descripcionCategoria" placeholder="Descripción de la categoría" required>
+    <button type="submit">Guardar Categoría</button>
+  </form>
+
+  <h2>Lista de Categorías</h2>
+  <table id="tablaCategorias">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Categoria</th>
+        <th>Descripción</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const formCategoria = document.getElementById('formCategoria');
+    const tablaCategorias = document.getElementById('tablaCategorias').querySelector('tbody');
+    let editandoCategoria = null;
+    let idCategoria = 1; // Contador autoincremental
+
+    formCategoria.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const nombre = document.getElementById('nombreCategoria').value.trim();
+      const descripcion = document.getElementById('descripcionCategoria').value.trim();
+
+      if (!nombre || !descripcion) return;
+
+      if (editandoCategoria) {
+        // Editar fila existente
+        editandoCategoria.querySelector('.col-nombre').textContent = nombre;
+        editandoCategoria.querySelector('.col-descripcion').textContent = descripcion;
+        editandoCategoria = null;
+      } else {
+        // Agregar nueva fila con ID auto
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="col-id">${String(idCategoria).padStart(3, '0')}</td>
+          <td class="col-nombre">${nombre}</td>
+          <td class="col-descripcion">${descripcion}</td>
+          <td>
+            <button onclick="editarCategoria(this)">Editar</button>
+            <button onclick="eliminarCategoria(this)">Eliminar</button>
+          </td>
+        `;
+        tablaCategorias.appendChild(row);
+        idCategoria++;
+      }
+
+      formCategoria.reset();
+    });
+
+    function eliminarCategoria(btn) {
+      const row = btn.closest('tr');
+      row.remove();
+    }
+
+    function editarCategoria(btn) {
+      const row = btn.closest('tr');
+      const nombre = row.querySelector('.col-nombre').textContent;
+      const descripcion = row.querySelector('.col-descripcion').textContent;
+
+      document.getElementById('nombreCategoria').value = nombre;
+      document.getElementById('descripcionCategoria').value = descripcion;
+
+      editandoCategoria = row;
+    }
+  </script>
+</body>
+</html>

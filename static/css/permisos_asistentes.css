@@ -1,0 +1,65 @@
+  
+        /* Estilo acordeón */
+        .accordion-button {
+            font-weight: bold;
+            font-size: 1rem;
+            background: linear-gradient(90deg, #198754, #418666);
+            color: #fff;
+            border-radius: 12px;
+        }
+
+        .accordion-button:not(.collapsed) {
+            color: #fff;
+            background: linear-gradient(90deg, #198754, #418666);
+        }
+
+        .accordion-item {
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+
+        /* Tarjetas de usuarios */
+        .user-card {
+            border-radius: 12px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            background: #fff;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .user-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Botones */
+        .btn-custom {
+            border-radius: 8px;
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+    /* --- Botón Regresar --- */
+.container.bg-white.p-4.rounded.shadow {
+  position: relative; /* el botón se posiciona dentro del contenedor del formulario */
+}
+
+.container.bg-white.p-4.rounded.shadow .btn-outline-success.position-absolute {
+  position: sticky;  /* ✅ se mantiene visible al hacer scroll */
+  top: 10px;
+  left: 10px;
+  z-index: 20;
+  padding: 6px 12px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease-in-out;
+}
+
+.container.bg-white.p-4.rounded.shadow .btn-outline-success.position-absolute:hover {
+  background: #198754;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gestión de Donaciones</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f5f5f5;
+    }
+    h1, h2 {
+      color: #2c3e50;
+    }
+    form, table {
+      background-color: #fff;
+      padding: 15px;
+      margin-bottom: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    input, select, textarea {
+      margin-bottom: 10px;
+      padding: 8px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    textarea {
+      resize: vertical;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #2980b9;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1c5980;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Gestión de Donaciones</h1>
+
+<form id="formDonacion">
+  <input type="text" id="donante" placeholder="Nombre del Donante" required />
+  <input type="text" id="productoDonado" placeholder="Producto Donado" required />
+  <input type="number" id="cantidadDonada" placeholder="Cantidad Donada" min="1" required />
+  <input type="date" id="fechaDonacion" required />
+  <select id="bodegaDestino" required>
+    <option value="">Seleccionar Bodega de Destino</option>
+  </select>
+  <textarea id="observaciones" placeholder="Observaciones (opcional)" rows="3"></textarea>
+  <button type="submit">Registrar Donación</button>
+</form>
+
+<h2>Lista de Donaciones</h2>
+<table id="tablaDonaciones">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Donante</th>
+      <th>Producto</th>
+      <th>Cantidad</th>
+      <th>Fecha</th>
+      <th>Bodega de Destino</th>
+      <th>Observaciones</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+  const formDonacion = document.getElementById('formDonacion');
+  const tablaDonaciones = document.getElementById('tablaDonaciones').querySelector('tbody');
+  const selectBodegaDestino = document.getElementById('bodegaDestino');
+  let idDonacion = 1;
+  let editandoDonacion = null;
+
+  // Simulación: lista de bodegas (en la práctica, cargar desde tu nodo de bodegas)
+  const bodegas = [
+    { id: 1, nombre: 'Bodega Central' },
+    { id: 2, nombre: 'Bodega Norte' },
+    { id: 3, nombre: 'Bodega Sur' }
+  ];
+
+  // Cargar bodegas en el select
+  function cargarBodegas() {
+    bodegas.forEach(bodega => {
+      const option = document.createElement('option');
+      option.value = bodega.nombre;
+      option.textContent = bodega.nombre;
+      selectBodegaDestino.appendChild(option);
+    });
+  }
+
+  cargarBodegas();
+
+  // Establecer fecha hoy por defecto
+  document.getElementById('fechaDonacion').valueAsDate = new Date();
+
+  formDonacion.addEventListener('submit', e => {
+    e.preventDefault();
+
+    const donante = document.getElementById('donante').value.trim();
+    const productoDonado = document.getElementById('productoDonado').value.trim();
+    const cantidadDonada = Number(document.getElementById('cantidadDonada').value);
+    const fechaDonacion = document.getElementById('fechaDonacion').value;
+    const bodegaDestino = document.getElementById('bodegaDestino').value;
+    const observaciones = document.getElementById('observaciones').value.trim();
+
+    if (!donante || !productoDonado || cantidadDonada <= 0 || !fechaDonacion || !bodegaDestino) {
+      alert('Por favor completa todos los campos obligatorios correctamente.');
+      return;
+    }
+
+    if (editandoDonacion) {
+      const cells = editandoDonacion.querySelectorAll('td');
+      cells[1].textContent = donante;
+      cells[2].textContent = productoDonado;
+      cells[3].textContent = cantidadDonada;
+      cells[4].textContent = fechaDonacion;
+      cells[5].textContent = bodegaDestino;
+      cells[6].textContent = observaciones || '-';
+      editandoDonacion = null;
+    } else {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${String(idDonacion).padStart(3, '0')}</td>
+        <td>${donante}</td>
+        <td>${productoDonado}</td>
+        <td>${cantidadDonada}</td>
+        <td>${fechaDonacion}</td>
+        <td>${bodegaDestino}</td>
+        <td>${observaciones || '-'}</td>
+        <td>
+          <button onclick="editarDonacion(this)">Editar</button>
+          <button onclick="eliminarDonacion(this)">Eliminar</button>
+        </td>
+      `;
+      tablaDonaciones.appendChild(row);
+      idDonacion++;
+    }
+
+    formDonacion.reset();
+    document.getElementById('fechaDonacion').valueAsDate = new Date();
+  });
+
+  function eliminarDonacion(btn) {
+    const row = btn.closest('tr');
+    if (editandoDonacion === row) editandoDonacion = null;
+    row.remove();
+  }
+
+  function editarDonacion(btn) {
+    const row = btn.closest('tr');
+    const cells = row.querySelectorAll('td');
+
+    document.getElementById('donante').value = cells[1].textContent;
+    document.getElementById('productoDonado').value = cells[2].textContent;
+    document.getElementById('cantidadDonada').value = cells[3].textContent;
+    document.getElementById('fechaDonacion').value = cells[4].textContent;
+    document.getElementById('bodegaDestino').value = cells[5].textContent;
+    document.getElementById('observaciones').value = cells[6].textContent === '-' ? '' : cells[6].textContent;
+
+    editandoDonacion = row;
+  }
+</script>
+
+</body>
+</html>

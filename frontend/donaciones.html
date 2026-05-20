@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Donación</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        form, table {
+            background-color: #fff;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        input, select {
+            margin-bottom: 10px;
+            padding: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #2980b9;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1c5980;
+        }
+    </style>
+</head>
+<body>
+    <h1>Registrar Donación</h1>
+   
+    <button onclick="window.history.back()" class="btn-regresar">⬅ Volver</button><br><br>
+   
+    <form>
+        <input type="text" placeholder="ID de transacción" required>
+        <input type="date" placeholder="Fecha de donación" required>
+        <input type="text" placeholder="Donante" required>
+        <input type="text" placeholder="Cantidad o valor de la donación" required>
+        <input type="text" placeholder="Banco de Alimento receptor (ID o nombre)" required>
+        <button type="submit">Guardar Donación</button>
+    </form>
+
+</body>
+</html>

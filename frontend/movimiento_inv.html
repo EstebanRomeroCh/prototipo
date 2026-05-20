@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<title>Movimiento de Inventario</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f5f5f5;
+  }
+  h1, h2 {
+    color: #2c3e50;
+  }
+  form, table {
+    background-color: #fff;
+    padding: 15px;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  input, select {
+    margin-bottom: 10px;
+    padding: 8px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  table, th, td {
+    border: 1px solid #ccc;
+  }
+  th, td {
+    padding: 10px;
+    text-align: left;
+  }
+  button {
+    padding: 10px 15px;
+    background-color: #2980b9;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  button:hover {
+    background-color: #1c5980;
+  }
+</style>
+</head>
+<body>
+
+<h1>Movimiento de Inventario</h1>
+
+<form id="formMovimiento">
+  <input type="text" id="producto" placeholder="Nombre del producto" required />
+  <input type="number" id="cantidad" placeholder="Cantidad" min="1" required />
+  <select id="tipoMovimiento" required>
+    <option value="">Tipo de movimiento</option>
+    <option value="entrada">Entrada</option>
+    <option value="salida">Salida</option>
+  </select>
+  <input type="date" id="fechaMovimiento" required />
+  <select id="bodega" required>
+    <option value="">Selecciona la bodega</option>
+  </select>
+  <input type="text" id="responsable" placeholder="Responsable" required />
+  <button type="submit">Registrar Movimiento</button>
+</form>
+
+<h2>Lista de Movimientos</h2>
+<table id="tablaMovimientos">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Producto</th>
+      <th>Cantidad</th>
+      <th>Tipo</th>
+      <th>Fecha</th>
+      <th>Bodega</th>
+      <th>Responsable</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+  const formMovimiento = document.getElementById('formMovimiento');
+  const tablaMovimientos = document.getElementById('tablaMovimientos').querySelector('tbody');
+  const selectBodega = document.getElementById('bodega');
+  let idMovimiento = 1;
+  let editandoMovimiento = null;
+
+  // Simulación: lista de bodegas (en la práctica, cargar desde tu nodo de bodegas)
+  const bodegas = [
+    { id: 1, nombre: 'Bodega Central' },
+    { id: 2, nombre: 'Bodega Norte' },
+    { id: 3, nombre: 'Bodega Sur' }
+  ];
+
+  // Cargar bodegas en el select
+  function cargarBodegas() {
+    bodegas.forEach(bodega => {
+      const option = document.createElement('option');
+      option.value = bodega.nombre;
+      option.textContent = bodega.nombre;
+      selectBodega.appendChild(option);
+    });
+  }
+
+  cargarBodegas();
+
+  // Establecer fecha hoy por defecto
+  document.getElementById('fechaMovimiento').valueAsDate = new Date();
+
+  formMovimiento.addEventListener('submit', e => {
+    e.preventDefault();
+
+    const producto = document.getElementById('producto').value.trim();
+    const cantidad = Number(document.getElementById('cantidad').value);
+    const tipo = document.getElementById('tipoMovimiento').value;
+    const fecha = document.getElementById('fechaMovimiento').value;
+    const bodega = document.getElementById('bodega').value;
+    const responsable = document.getElementById('responsable').value.trim();
+
+    if (!producto || cantidad <= 0 || !tipo || !fecha || !bodega || !responsable) {
+      alert('Por favor completa todos los campos correctamente.');
+      return;
+    }
+
+    if (editandoMovimiento) {
+      const cells = editandoMovimiento.querySelectorAll('td');
+      cells[1].textContent = producto;
+      cells[2].textContent = cantidad;
+      cells[3].textContent = tipo;
+      cells[4].textContent = fecha;
+      cells[5].textContent = bodega;
+      cells[6].textContent = responsable;
+      editandoMovimiento = null;
+    } else {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${String(idMovimiento).padStart(3, '0')}</td>
+        <td>${producto}</td>
+        <td>${cantidad}</td>
+        <td>${tipo}</td>
+        <td>${fecha}</td>
+        <td>${bodega}</td>
+        <td>${responsable}</td>
+        <td>
+          <button onclick="editarMovimiento(this)">Editar</button>
+          <button onclick="eliminarMovimiento(this)">Eliminar</button>
+        </td>
+      `;
+      tablaMovimientos.appendChild(row);
+      idMovimiento++;
+    }
+
+    formMovimiento.reset();
+    document.getElementById('fechaMovimiento').valueAsDate = new Date();
+  });
+
+  function eliminarMovimiento(btn) {
+    const row = btn.closest('tr');
+    if (editandoMovimiento === row) editandoMovimiento = null;
+    row.remove();
+  }
+
+  function editarMovimiento(btn) {
+    const row = btn.closest('tr');
+    const cells = row.querySelectorAll('td');
+
+    document.getElementById('producto').value = cells[1].textContent;
+    document.getElementById('cantidad').value = cells[2].textContent;
+    document.getElementById('tipoMovimiento').value = cells[3].textContent;
+    document.getElementById('fechaMovimiento').value = cells[4].textContent;
+    document.getElementById('bodega').value = cells[5].textContent;
+    document.getElementById('responsable').value = cells[6].textContent;
+
+    editandoMovimiento = row;
+  }
+</script>
+
+</body>
+</html>

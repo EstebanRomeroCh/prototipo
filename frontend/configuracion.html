@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Configuración del Sistema</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      color: #2c3e50;
+    }
+    form {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      max-width: 600px;
+      margin: auto;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 15px;
+      background-color: #2980b9;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1c5980;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Configuración del Sistema</h1>
+
+<form id="formConfiguracion">
+  <label for="nombreBanco">Nombre del Banco de Alimentos</label>
+  <input type="text" id="nombreBanco" placeholder="Ej: Banco de Alimentos San José" required>
+
+  <label for="correoContacto">Correo de contacto</label>
+  <input type="email" id="correoContacto" placeholder="contacto@ejemplo.com">
+
+  <label for="telefono">Teléfono</label>
+  <input type="tel" id="telefono" placeholder="Ej: 3001234567">
+
+  <label for="direccion">Dirección</label>
+  <input type="text" id="direccion" placeholder="Calle 123 #45-67, Ciudad">
+
+  <label for="diasAlerta">Días de alerta antes del vencimiento</label>
+  <input type="number" id="diasAlerta" min="1" value="7">
+
+  <label for="formatoFecha">Formato de fecha</label>
+  <select id="formatoFecha">
+    <option value="dd/mm/yyyy">dd/mm/yyyy</option>
+    <option value="mm/dd/yyyy">mm/dd/yyyy</option>
+  </select>
+
+  <div style="display: flex; gap: 10px; margin-top: 20px;">
+    <button type="submit">Guardar Configuración</button>
+    <button type="button" onclick="irAPermisos()"  >Gestionar Permisos</button>
+  </div>
+  
+</form>
+
+<script>
+    
+    function irAPermisos() {
+        window.location.href = "permisos.html";
+    }
+  const form = document.getElementById('formConfiguracion');
+
+  // Guardar configuración
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const config = {
+      nombreBanco: document.getElementById('nombreBanco').value,
+      correo: document.getElementById('correoContacto').value,
+      telefono: document.getElementById('telefono').value,
+      direccion: document.getElementById('direccion').value,
+      diasAlerta: document.getElementById('diasAlerta').value,
+      formatoFecha: document.getElementById('formatoFecha').value
+    };
+
+    localStorage.setItem('configSistema', JSON.stringify(config));
+    alert("✅ Configuración guardada correctamente.");
+  });
+
+  // Cargar configuración si ya existe
+  window.addEventListener('load', () => {
+    const config = JSON.parse(localStorage.getItem('configSistema'));
+    if (config) {
+      document.getElementById('nombreBanco').value = config.nombreBanco || '';
+      document.getElementById('correoContacto').value = config.correo || '';
+      document.getElementById('telefono').value = config.telefono || '';
+      document.getElementById('direccion').value = config.direccion || '';
+      document.getElementById('diasAlerta').value = config.diasAlerta || 7;
+      document.getElementById('formatoFecha').value = config.formatoFecha || 'dd/mm/yyyy';
+    }
+   
+  });
+</script>
+
+</body>
+</html>

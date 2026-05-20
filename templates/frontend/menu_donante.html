@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ÁBACO DIOCESANO</title>
+  <link rel="stylesheet" href="/static/css/general.css" />
+  <link rel="shortcut icon" href="/static/images/favicon.png" type="image/x-icon">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+
+
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <button id="btnToggleSidebar" class="btn-toggle-sidebar" type="button" aria-label="Abrir menú">
+      ☰
+    </button>
+    <img src="/static/images/imagen.png" alt="logo de abaco">
+    <h5 class="mb-0"> <strong>DIOCESANO</strong></h5>
+    <div>
+      <!-- Dropdown usuario -->
+      <div class="dropdown">
+        <a class="d-flex align-items-center text-decoration-none dropdown-toggle" href="#" id="menuUsuario"
+          role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: inherit;">
+
+          <i class="bi bi-person-circle me-2"></i>
+          <strong>{{usuario}}</strong>
+        </a>
+
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuUsuario">
+          <li>
+            <a class="dropdown-item" href="{{url_for('rutas_dp.manual_usuario')}}" target="_blank">
+              <i class="bi bi-journal-text me-2"></i> Manual de usuario
+            </a>
+          </li>
+          <li>
+            <hr class="dropdown-divider">
+          </li>
+          <li>
+            <a class="dropdown-item text-danger" style="cursor: pointer;" onclick="cerrar()">
+              <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
+            </a>
+          </li>
+        </ul>
+      </div> <span class="noti-wrapper me-3 position-relative">
+        <i class="bi bi-bell-fill" id="iconoNotificaciones" style="cursor:pointer;"
+          onclick="mostrarNotificaciones()"></i>
+        <span id="badgeNotificaciones" class="badge-notify d-none">0</span>
+      </span>
+
+    </div>
+
+  </header>
+
+  <!-- LAYOUT -->
+  <div class="main-layout">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <a href="{{ url_for('rutas_dp.menu_central') }}"><i class="bi bi-house-door-fill"></i><span>Inicio</span></a>
+      <a href="{{ url_for('rutas_dp.menu_de_parroquias') }}"><i class="bi bi-bank"></i><span>Organizaciones</span></a>
+      <a href="{{ url_for('rutas_dp.menu_producto') }}"><i class="bi bi-bookmark-plus"></i><span>Productos</span></a>
+      <a href="{{ url_for('rutas_dp.menu_donante') }}"><i class="bi bi-people-fill"></i><span>Donantes</span></a>
+      <a href="{{ url_for('rutas_dp.pagina_principal') }}"><i class="bi bi-heart-fill"></i><span>Entradas</span></a>
+      <a href="{{ url_for('rutas_dp.lista_donaciones') }}"><i class="bi bi-bag-check"></i><span>Lista de
+          Entradas</span></a>
+      <a href="{{ url_for('rutas_dp.tabla_producto') }}"><i class="bi bi-table"></i><span>Inventario</span></a>
+      <a href="{{ url_for('rutas_dp.movimiento_inv') }}"><i class="bi bi-box-arrow-right"></i><span>Salidas</span></a>
+      <a href="{{ url_for('rutas_dp.lista_salidas') }}"><i class="bi bi-card-checklist"></i><span> Lista de
+          Salidas</span></a>
+      <a href="{{ url_for('rutas_dp.menu_gastos') }}"><i class="bi bi-box-seam"></i><span>Reportes de Salidas</span></a>
+      <a href="{{ url_for('rutas_dp.menu_reportes') }}"><i class="bi bi-graph-up"></i><span>Reportes y
+          Certificados</span></a>
+      <a href="{{ url_for('rutas_dp.pag_confi') }}"><i class="bi bi-gear-fill"></i><span>Configuración</span></a>
+      <a class="mt-auto" style="cursor: row-resize;" onclick="cerrar()"><i class="bi bi-box-arrow-left"></i><span>Cerrar
+          sesión</span></a>
+    </div>
+
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="container my-4">
+
+      <div class="container bg-white p-4 rounded shadow">
+        <h1>Gestionar Donante</h1>
+        <div class="row g-4 justify-content-center">
+
+          <div class="col-12 col-sm-4 col-md-3 col-lg-3">
+            <div class="card text-center p-3"
+              onclick="window.location.href='{{url_for('rutas_dp.tipo_donante_page')}}'">
+              <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto" width="70" height="70" viewBox="0 0 24 24">
+                <path fill="currentColor"
+                  d="M5 19V5zm.616 1q-.691 0-1.153-.462T4 18.384V5.616q0-.691.463-1.153T5.616 4h12.769q.69 0 1.153.463T20 5.616v7.717q0 .215-.144.355t-.357.139t-.356-.144t-.143-.356V5.616q0-.231-.192-.424T18.384 5H5.616q-.231 0-.424.192T5 5.616v12.769q0 .23.192.423t.423.192h6.193q.212 0 .356.144t.144.357t-.144.356t-.356.143zm2.5-3.462q.328 0 .549-.221q.22-.221.22-.549t-.222-.548t-.549-.22t-.548.222t-.22.549t.222.547t.549.22m0-3.769q.327 0 .548-.221q.22-.222.22-.55t-.222-.547t-.549-.22t-.548.221t-.22.55t.222.547t.549.22m0-3.769q.327 0 .548-.221q.22-.222.22-.55t-.222-.547t-.549-.22t-.548.221q-.22.222-.22.549t.222.548t.549.22m7.96 3.5q.213 0 .356-.144t.144-.357t-.144-.356t-.356-.143h-4.385q-.212 0-.356.144t-.144.357t.144.356t.356.143zm0-3.77q.213 0 .356-.143q.144-.144.144-.357t-.144-.356t-.356-.143h-4.385q-.212 0-.356.144t-.144.357t.144.356t.356.143zm-4.885 7.04q0 .213.144.356t.356.143h1.204q.213 0 .357-.144t.143-.356t-.143-.356t-.357-.144h-1.204q-.212 0-.356.144t-.144.357m6.231 3.73h-2.5q-.213 0-.356-.144t-.144-.357t.144-.356t.356-.143h2.5V16q0-.213.144-.356t.357-.144t.356.144t.143.356v2.5h2.5q.213 0 .356.144t.144.357t-.144.356t-.356.143h-2.5V22q0 .213-.144.356q-.144.144-.357.144t-.356-.144t-.143-.356z" />
+              </svg>
+
+              <div class="card-body p-0">
+                <p class="card-text">Crear Tipo de Donante</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-sm-4 col-md-3 col-lg-3">
+            <div class="card text-center p-3" onclick="window.location.href='{{ url_for('rutas_dp.donante_page') }}'">
+              <svg xmlns="http://www.w3.org/2000/svg" class='mx-auto' width="70" height="70" viewBox="0 0 24 24">
+                <g fill="none">
+                  <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-linecap="round" stroke-width="1" />
+                  <path fill="currentColor" fill-rule="evenodd"
+                    d="M15.276 16a11 11 0 0 0-4.37-.446c-1.64.162-3.191.686-4.456 1.517c-1.264.832-2.196 1.943-2.648 3.208a.5.5 0 1 0 .941.336C5.11 19.588 5.885 18.64 7 17.907s2.508-1.21 4.005-1.358c.55-.054 1.103-.063 1.649-.028A2 2 0 0 1 14 16z"
+                    clip-rule="evenodd" />
+                  <path stroke="currentColor" stroke-linecap="round" d="M18 14v8m4-4h-8" stroke-width="1" />
+                </g>
+              </svg>
+              <div class="card-body p-0">
+                <p class="card-text">Nuevo Donante</p>
+              </div>
+            </div>
+          </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </div>
+  <img src="/static/images/favicon.png" alt="header icon" style="
+        width: 30px;
+        height: 30px;
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+z-index: 999;">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    resaltar()
+  </script>
+  <script src="/static/js/resaltar.js"></script>
+  <script src="/static/js/notificacion.js"></script>
+  <script src="/static/js/time.js"></script>
+
+</body>
+
+</html>

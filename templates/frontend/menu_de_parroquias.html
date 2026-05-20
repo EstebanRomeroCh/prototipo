@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ÁBACO DIOCESANO</title>
+  <link rel="stylesheet" href="/static/css/general.css">
+  <link rel="shortcut icon" href="/static/images/favicon.png" type="image/x-icon">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+  <style>
+    .cuadro-container {
+      background-color: #ffffff;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      margin: auto;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <button id="btnToggleSidebar" class="btn-toggle-sidebar" type="button" aria-label="Abrir menú">
+      ☰
+    </button>
+    <img src="/static/images/imagen.png" alt="logo de abaco">
+    <h5 class="mb-0"> <strong>DIOCESANO</strong></h5>
+    <div>
+      <!-- Dropdown usuario -->
+      <div class="dropdown">
+        <a class="d-flex align-items-center text-decoration-none dropdown-toggle" href="#" id="menuUsuario"
+          role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: inherit;">
+
+          <i class="bi bi-person-circle me-2"></i>
+          <strong>{{usuario}}</strong>
+        </a>
+
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuUsuario">
+          <li>
+            <a class="dropdown-item" href="{{url_for('rutas_dp.manual_usuario')}}" target="_blank">
+              <i class="bi bi-journal-text me-2"></i> Manual de usuario
+            </a>
+          </li>
+          <li>
+            <hr class="dropdown-divider">
+          </li>
+          <li>
+            <a class="dropdown-item text-danger" style="cursor: pointer;" onclick="cerrar()">
+              <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
+            </a>
+          </li>
+        </ul>
+      </div> <span class="noti-wrapper me-3 position-relative">
+        <i class="bi bi-bell-fill" id="iconoNotificaciones" style="cursor:pointer;"
+          onclick="mostrarNotificaciones()"></i>
+        <span id="badgeNotificaciones" class="badge-notify d-none">0</span>
+      </span>
+
+    </div>
+
+  </header>
+
+  <!-- LAYOUT -->
+  <div class="main-layout">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <a href="{{ url_for('rutas_dp.menu_central') }}"><i class="bi bi-house-door-fill"></i><span>Inicio</span></a>
+      <a href="{{ url_for('rutas_dp.menu_de_parroquias') }}"><i class="bi bi-bank"></i><span>Organizaciones</span></a>
+      <a href="{{ url_for('rutas_dp.menu_producto') }}"><i class="bi bi-bookmark-plus"></i><span>Productos</span></a>
+      <a href="{{ url_for('rutas_dp.menu_donante') }}"><i class="bi bi-people-fill"></i><span>Donantes</span></a>
+      <a href="{{ url_for('rutas_dp.pagina_principal') }}"><i class="bi bi-heart-fill"></i><span>Entradas</span></a>
+      <a href="{{ url_for('rutas_dp.lista_donaciones') }}"><i class="bi bi-bag-check"></i><span>Lista de
+          Entradas</span></a>
+      <a href="{{ url_for('rutas_dp.tabla_producto') }}"><i class="bi bi-table"></i><span>Inventario</span></a>
+      <a href="{{ url_for('rutas_dp.movimiento_inv') }}"><i class="bi bi-box-arrow-right"></i><span>Salidas</span></a>
+      <a href="{{ url_for('rutas_dp.lista_salidas') }}"><i class="bi bi-card-checklist"></i><span> Lista de
+          Salidas</span></a>
+      <a href="{{ url_for('rutas_dp.menu_gastos') }}"><i class="bi bi-box-seam"></i><span>Reportes de Salidas</span></a>
+      <a href="{{ url_for('rutas_dp.menu_reportes') }}"><i class="bi bi-graph-up"></i><span>Reportes y
+          Certificados</span></a>
+      <a href="{{ url_for('rutas_dp.pag_confi') }}"><i class="bi bi-gear-fill"></i><span>Configuración</span></a>
+      <a class="mt-auto" style="cursor: row-resize;" onclick="cerrar()"><i class="bi bi-box-arrow-left"></i><span>Cerrar
+          sesión</span></a>
+    </div>
+
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="container my-4">
+
+      <div class="container bg-white p-4 rounded shadow">
+
+        <h1>Gestionar Parroquia</h1>
+        <div class="row g-4 justify-content-center">
+
+          <!-- Tipo de organización -->
+          <div class="col-12 col-sm-4 col-md-3 col-lg-3">
+            <div class="card text-center p-3"
+              onclick="window.location.href='{{ url_for('rutas_dp.crear_organizacion') }}'">
+              <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto" viewBox="0 0 512 512">
+                <path fill="none"
+                  d="M247.759 14.358L16 125.946V184h480v-58.362ZM464 152H48v-5.946l200.241-96.412L464 146.362ZM16 496h480V392H16Zm32-72h416v40H48Zm24-216h32v160H72zm336 0h32v160h-32zm-224 0h32v160h-32zm112 0h32v160h-32z"
+                  stroke="currentColor" stroke-width="6" />
+              </svg>
+              <div class="card-body p-0">
+                <p class="card-text">Tipo de Organización</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Parroquias -->
+          <div class="col-12 col-sm-4 col-md-3 col-lg-3">
+            <div class="card text-center p-3"
+              onclick="window.location.href='{{ url_for('rutas_dp.gestion_parroquias') }}'">
+              <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto" viewBox="0 0 64 64">
+                <path fill="none"
+                  d="M61.063 60.125h-.938v-15.01c.731.035 1.443-.371 1.739-1.074a1.754 1.754 0 0 0-.965-2.297l-15.774-6.443v-6.386l.348.141c.906.367 1.956-.058 2.329-.944c.376-.887-.059-1.914-.963-2.28l-13.276-5.523V9.813h4.688V6.688h-4.688V2h-3.125v4.688H25.75v3.125h4.688v10.495l-13.276 5.523c-.904.366-1.339 1.394-.963 2.28c.373.887 1.423 1.312 2.327.944l.35-.142V35.3L3.099 41.744a1.754 1.754 0 0 0-.963 2.297c.294.703 1.008 1.11 1.739 1.074v15.01h-.937c-.517 0-.938.422-.938.938s.421.937.938.937h58.125c.514 0 .937-.422.937-.937s-.423-.938-.937-.938m-42.188 0H5.75V44.466l13.125-5.361zm12.188-1.562H28.25V55.75h2.813zm0-4.063H28.25v-2.813c0-1.742 1.199-3.198 2.813-3.617zm4.687 4.063h-2.813V55.75h2.813zm0-4.063h-2.813v-6.429c1.612.419 2.813 1.875 2.813 3.616zm7.5 5.625h-5.625v-8.438a5.625 5.625 0 0 0-11.25 0v8.438H20.75V28.153L32 23.59l11.25 4.564zm15 0H45.125V39.104l13.125 5.361z"
+                  stroke="currentColor" stroke-width="1" />
+              </svg>
+              <div class="card-body p-0">
+                <p class="card-text">Parroquias</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fundaciones -->
+          <div class="col-12 col-sm-4 col-md-3 col-lg-3">
+            <div class="card text-center p-3" onclick="window.location.href='{{ url_for('rutas_dp.fundaciones') }}'">
+              <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="7" width="18" height="14" rx="2" ry="2" />
+                <path d="M2 7l10-5 10 5" />
+                <path d="M12 13s-1.5-2-3-2a2 2 0 0 0 0 4c1.5 0 3 2 3 2s1.5-2 3-2a2 2 0 0 0 0-4c-1.5 0-3 2-3 2z" />
+              </svg>
+              <div class="card-body p-0">
+                <p class="card-text">Fundaciones</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+  <img src="/static/images/favicon.png" alt="header icon" style="
+        width: 30px;
+        height: 30px;
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+z-index: 999;">
+  <script src="/static/js/resaltar.js"></script>
+  <script src="/static/js/notificacion.js"></script>
+  <script src="/static/js/time.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    resaltar()
+  </script>
+
+</body>
+
+</html>

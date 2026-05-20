@@ -1,0 +1,56 @@
+body,
+html {
+    height: 100%;
+    margin: 0;
+    background-color: #7ab972;
+}
+
+.login-section {
+    display: flex;
+    height: 100vh;
+}
+
+/* Columna izquierda - formulario */
+.login-left {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #7ab972;
+}
+
+.login-container {
+    position: relative;
+    /* 🔹 NECESARIO para anclar el botón dentro */
+    max-width: 400px;
+    width: 100%;
+    padding: 2rem;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 0.75rem;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Columna derecha - imagen como fondo */
+.login-right {
+    flex: 1;
+    background: url('https://radionacional-v3.s3.amazonaws.com/s3fs-public/styles/portadas_relaciona_4_3/public/node/article/field_image/WhatsApp%20Image%202023-09-29%20at%206.52.21%20AM-2.jpeg?h=ada05aa9&itok=qgYoQF1A') no-repeat center center;
+    background-size: cover;
+    border-top-right-radius: 150px;
+    border-bottom-left-radius: 150px;
+}
+
+/* Responsive: ocultar imagen en móviles */
+@media (max-width: 768px) {
+    .login-right {
+        display: none;
+    }
+
+    .login-left {
+        flex: 1;
+    }
+}
+
+.form-control:focus {
+    box-shadow: none;
+    border-color: #198754;
+}

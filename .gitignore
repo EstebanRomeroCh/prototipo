@@ -1,0 +1,24 @@
+# Entornos virtuales
+venv/
+env/
+
+# Archivos compilados de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Configuración del IDE
+.vscode/
+.idea/
+
+# Archivos temporales
+*.log
+*.tmp
+
+# Carpeta de base de datos SQLite (si llegas a usarla)
+*.sqlite3
+
+# Sistema operativo
+.DS_Store
+Thumbs.db

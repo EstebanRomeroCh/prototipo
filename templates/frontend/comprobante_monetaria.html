@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="/static/images/favicon.png" type="image/x-icon">
+
+    <title>Comprobante de Donación Monetaria</title>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f2f2f2;
+            padding: 30px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .documento {
+            background: white;
+            width: 800px;
+            padding: 25px 35px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #00A859;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .header h2 {
+            margin: 5px 0;
+            color: #00A859;
+        }
+
+        .info {
+            margin-bottom: 15px;
+            font-size: 15px;
+        }
+
+        .info strong {
+            color: #333;
+        }
+
+        .monto-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f9f0;
+            border-left: 4px solid #00A859;
+            border-radius: 6px;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            color: #008f52;
+        }
+
+        .acciones {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .acciones button {
+            background: #00A859;
+            color: white;
+            padding: 10px 18px;
+            border: none;
+            margin: 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .acciones button:hover {
+            background: #007a43;
+        }
+
+        @media print {
+            .acciones {
+                display: none;
+            }
+
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .documento {
+                box-shadow: none;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="documento">
+
+        <div class="header">
+            <h2>COMPROBANTE DE DONACIÓN MONETARIA</h2>
+            <p>Sistema de Inventario y Donaciones – Diócesis</p>
+        </div>
+
+        <div class="info">
+            <p><strong>ID Donación:</strong> {{ d.id_donacion }}</p>
+            <p><strong>Fecha:</strong> {{ d.fecha_donacion }}</p>
+            <p><strong>Donante:</strong> {{ d.donante }}</p>
+            <p><strong>Documento:</strong> {{ d.numero_documento }}</p>
+            <p><strong>Método:</strong> {{ d.metodo }}</p>
+            <p><strong>Descripción:</strong> {{ d.descripcion or 'Sin descripción' }}</p>
+            {% if anexos and anexos|length > 0 %}
+            <h5>Comprobantes anexos</h5>
+            <ul>
+                {% for a in anexos %}
+                <li>
+                    <a href="{{ url_for('archivos_monetarias_bp.ver_archivo_monetaria', filename=a.nombre_guardado) }}" target="_blank">
+                        {{ a.nombre_original }}
+                    </a>
+                    
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p><em>No hay anexos registrados para esta donación.</em></p>
+            {% endif %}
+
+        </div>
+
+        <div class="monto-box">
+            $ {{ "{:,.2f}".format(d.monto) }}
+        </div>
+
+        <div class="acciones">
+            <button onclick="window.print()"> Imprimir</button>
+            <button onclick="guardarPDF()"> Guardar PDF</button>
+        </div>
+
+    </div>
+<img src="/static/images/favicon.png"
+     alt="header icon"
+     style="
+        width: 30px;
+        height: 30px;
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+z-index: 999;">
+    <script>
+        function guardarPDF() {
+            window.print();
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="/static/images/favicon.png" type="image/x-icon">
+
+    <title>Comprobante de Donación</title>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f2f2f2;
+            padding: 30px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .documento {
+            background: white;
+            width: 800px;
+            padding: 25px 35px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #00A859;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .header h2 {
+            margin: 5px 0;
+            color: #00A859;
+        }
+
+        .info {
+            margin-bottom: 15px;
+            font-size: 15px;
+        }
+
+        .info strong {
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        th {
+            background: #00A859;
+            color: white;
+            padding: 8px;
+        }
+
+        td {
+            border: 1px solid #ddd;
+            padding: 7px;
+            text-align: center;
+        }
+
+        .totales {
+            margin-top: 20px;
+            font-size: 16px;
+            text-align: right;
+        }
+
+        .acciones {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .acciones button {
+            background: #00A859;
+            color: white;
+            padding: 10px 18px;
+            border: none;
+            margin: 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .acciones button:hover {
+            background: #007a43;
+        }
+
+        @media print {
+            .acciones {
+                display: none;
+            }
+
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .documento {
+                box-shadow: none;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="documento">
+
+        <div class="header">
+            <!--h2>COMPROBANTE DE DONACIÓN</-h2-->
+            <h2>COMPROBANTE DE {{ entrada.tipo_entrada | upper }}</h2>
+
+            <p>Sistema de Inventario y Donaciones – Diócesis</p>
+        </div>
+
+        <div class="info">
+            <p><strong>ID Donación: {{ entrada.tipo_entrada | upper }} </strong> {{ entrada.id_entrada }}</p>
+            <p><strong>Fecha:</strong> {{ entrada.fecha_entrada }}</p>
+            <p><strong>Donante / Proveedor:</strong>
+                {{ entrada.donante }}
+            </p>
+            <p><strong>Observación:</strong> {{ entrada.observacion }}</p>
+
+            <p><strong>Valor total:</strong> {{ entrada.total_valor | format_money }}</p>
+            <p><strong>Peso total (kg):</strong> {{ entrada.total_peso_kg | format_kg }}</p>
+
+        </div>
+        {% if archivos %}
+        <div class="info">
+            <p><strong>Anexos de la entrada:</strong></p>
+            <ul>
+                {% for a in archivos %}
+                <li>
+                    <a href="{{ url_for('archivos_entradas_bp.ver_archivo_entrada',
+                    filename=a.nombre_guardado) }}" target="_blank">
+                        {{ a.nombre_original }}
+                    </a>
+
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Ítem</th>
+                    <th>Producto</th>
+                    <th>Categoría</th>
+                    <th>Bodega</th>
+                    <th>Ubicación</th>
+                    <th>Cantidad</th>
+                    <th>Peso (kg)</th>
+                    <th>Valor</th>
+                    <th>Vencimiento</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in detalles %}
+                <tr>
+                    <!-- Ítem -->
+                    <td>{{ loop.index }}</td>
+
+                    <!-- Lo que ya estaba bien -->
+                    <td>{{ d.producto }}</td>
+                    <td>{{ d.categoria }}</td>
+                    <td>{{ d.bodega}}</td>
+                    <td>{{ d.ubicacion or '-' }}</td>
+                    <td>{{ d.cantidad | format_kg }}</td>
+
+                    <!-- Peso: total por producto, en kg -->
+                    <td>{{ d.peso_total_kg | format_kg }} kg</td>
+
+                    <!-- Valor: total por producto -->
+                    <td>{{ d.valor_total | format_money }}</td>
+
+                    <td>{{ d.fecha_vencimiento or '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+        <div class="acciones">
+            <button onclick="window.print()"> Imprimir</button>
+            <button onclick="guardarPDF()"> Guardar PDF</button>
+        </div>
+
+    </div>
+<img src="/static/images/favicon.png"
+     alt="header icon"
+     style="
+        width: 30px;
+        height: 30px;
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+z-index: 999;">
+    <script>
+        function guardarPDF() {
+            window.print();
+        }
+    </script>
+
+</body>
+
+</html>

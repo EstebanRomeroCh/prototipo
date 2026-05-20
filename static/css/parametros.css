@@ -1,0 +1,272 @@
+
+        :root {
+            --primary: #27ae60;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --dark: #2c3e50;
+            --panel: #ffffff;
+            --muted: #7f8c8d;
+            --bg: linear-gradient(135deg, #eef2f3, #dfe9f3);
+            --border: #e0e6ef;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto
+        }
+
+        .dashboard {
+            background: var(--panel);
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 8px 20px rgba(16, 24, 40, 0.06);
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .add-param-btn {
+            background: var(--success);
+            color: #fff;
+            border-radius: 8px;
+            padding: 9px 14px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .param-type-selector {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px
+        }
+
+        .param-type-btn {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            background: #f6f8fb;
+            cursor: pointer;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .param-type-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary)
+        }
+
+        .top-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center
+        }
+
+        .search-input {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            min-width: 200px
+        }
+
+        .params-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px
+        }
+
+        .param-card {
+            background: linear-gradient(180deg, #fff, #fbfdff);
+            border-radius: 10px;
+            padding: 14px;
+            border-left: 5px solid var(--primary);
+            box-shadow: 0 6px 18px rgba(16, 24, 40, 0.04);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: transform .18s ease;
+        }
+
+        .param-card:hover {
+            transform: translateY(-6px)
+        }
+
+        .param-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .param-code {
+            background: var(--dark);
+            color: #fff;
+            padding: 4px 9px;
+            border-radius: 18px;
+            font-size: .85rem;
+            font-weight: 700
+        }
+
+        .param-status {
+            font-weight: 700;
+            padding: 4px 9px;
+            border-radius: 14px;
+            font-size: .82rem
+        }
+
+        .status-active {
+            background: #eafaf1;
+            color: var(--success)
+        }
+
+        .status-inactive {
+            background: #fdeaea;
+            color: var(--danger)
+        }
+
+        .param-name {
+            font-weight: 800;
+            margin: 0;
+            font-size: 1rem
+        }
+
+        .param-desc {
+            color: var(--muted);
+            font-size: .95rem;
+            margin-top: 6px
+        }
+
+        .param-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: auto
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 8px;
+            border-radius: 8px;
+            border: none;
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: .88rem
+        }
+
+        .edit-btn {
+            background: var(--primary)
+        }
+
+        .toggle-btn {
+            background: var(--warning)
+        }
+
+        .delete-btn {
+            background: var(--danger)
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 999
+        }
+
+        .modal.show {
+            display: flex
+        }
+
+        .modal-card {
+            width: 100%;
+            max-width: 520px;
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 12px 30px rgba(16, 24, 40, 0.12)
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--muted)
+        }
+
+        .form-group {
+            margin-bottom: 12px
+        }
+
+        label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 6px
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            outline: none
+        }
+
+        .submit-btn {
+            background: var(--primary);
+            color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            width: 100%;
+            font-weight: 800;
+            cursor: pointer
+        }
+
+        .notification {
+            position: fixed;
+            right: 18px;
+            top: 18px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: 800;
+            display: none;
+            z-index: 2000
+        }
+
+        .notification.show {
+            display: block
+        }
+
+        .notification.success {
+            background: var(--success)
+        }
+
+        .notification.error {
+            background: var(--danger)
+        }

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Parroquias</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        form, table {
+            background-color: #fff;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        input, select {
+            margin-bottom: 10px;
+            padding: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #2980b9;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1c5980;
+        }
+    </style>
+</head>
+<body>
+    <h1>Registrar Nueva Parroquia</h1>
+    <button onclick="window.history.back()" class="btn-regresar">⬅ Volver</button><br><br>
+
+    <form id="formParroquia">
+        <input type="text" id="nombreParroquia" placeholder="Nombre de la parroquia" required>
+        <select id="tipo_organizacion" required>
+            <option value="">Tipo de organización</option>
+            <option value="permanente">Permanente</option>
+            <option value="esporadica">Esporádica</option>
+        </select>
+        <input type="text" id="nombrePadre" placeholder="Nombre del padre" required>
+        <select id="tipoDocumento" required>
+            <option value="">Tipo de documento</option>
+            <option value="CC">Cédula</option>
+            <option value="TI">Tarjeta de Identidad</option>
+        </select>
+        <input type="text" id="numeroDocumento" placeholder="Número de documento" required>
+        <input type="tel" id="telefono" placeholder="Número de teléfono" required>
+        <input type="text" id="direccion" placeholder="Dirección" required>
+        <input type="email" id="correo" placeholder="Correo electrónico" required>
+        <input type="text" id="departamento" placeholder="Departamento" required>
+        <input type="text" id="ciudad" placeholder="Ciudad" required>
+        <button type="submit">Guardar Parroquia</button>
+    </form>
+
+    <h2>Lista de Parroquias Registradas</h2>
+    <table id="tablaParroquias">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Organización</th>
+                <th>Padre</th>
+                <th>Teléfono</th>
+                <th>Ciudad</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        const formParroquia = document.getElementById('formParroquia');
+        const tablaParroquias = document.getElementById('tablaParroquias').querySelector('tbody');
+        let idParroquia = 1;
+
+        formParroquia.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const nombre = document.getElementById('nombreParroquia').value;
+            const organizacion = document.getElementById('tipo_organizacion').value;
+            const padre = document.getElementById('nombrePadre').value;
+            const telefono = document.getElementById('telefono').value;
+            const ciudad = document.getElementById('ciudad').value;
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${String(idParroquia).padStart(3, '0')}</td>
+                <td>${nombre}</td>
+                <td>${organizacion}</td>
+                <td>${padre}</td>
+                <td>${telefono}</td>
+                <td>${ciudad}</td>
+                <td><button onclick="editarParroquia(this)">Editar</button> <button onclick="eliminarParroquia(this)">Eliminar</button></td>
+            `;
+
+            tablaParroquias.appendChild(row);
+            formParroquia.reset();
+            idParroquia++;
+        });
+
+        function eliminarParroquia(btn) {
+            const row = btn.parentElement.parentElement;
+            row.remove();
+        }
+
+        function editarParroquia(btn) {
+            const row = btn.parentElement.parentElement;
+            const cells = row.querySelectorAll('td');
+
+            document.getElementById('nombreParroquia').value = cells[1].textContent;
+            document.getElementById('tipo_organicion').value = cells[1].textContent;
+            document.getElementById('nombrePadre').value = cells[2].textContent;
+            document.getElementById('telefono').value = cells[3].textContent;
+            document.getElementById('ciudad').value = cells[4].textContent;
+
+            eliminarParroquia(btn);
+        }
+    </script>
+</body>
+</html>

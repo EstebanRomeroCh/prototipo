@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ÁBACO DIOCESANO</title>
+  <link rel="stylesheet" href="/static/css/general.css">
+  <link rel="shortcut icon" href="/static/images/favicon.png" type="image/x-icon">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+  <style>
+    /* Estilo tipo “hoja” para el certificado */
+    .certificado-impresion {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #ffffff;
+    }
+
+    .firmas {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .firma-col {
+      text-align: center;
+      padding-top: 10px;
+    }
+
+    .firma-linea {
+      border-top: 1px solid #000;
+      margin: 0 auto 8px auto;
+      width: 100%;
+    }
+
+    .firma-titulo {
+      font-weight: 600;
+    }
+
+    .firma-nombre {
+      margin-top: 6px;
+      font-size: 14px;
+    }
+
+    .firma-cargo {
+      font-size: 12px;
+      margin-top: 2px;
+      color: #333;
+    }
+
+    /* Cuando solo hay 2 firmas (productos), que se vea equilibrado */
+    .firmas.firmas-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 10mm;
+      }
+
+      header,
+      .sidebar,
+      #btnImprimirCertificado,
+      #btnVolver,
+      #formFiltrosCertificado,
+      .no-print {
+        display: none !important;
+      }
+
+      body {
+        background: #ffffff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .container,
+      .my-4 {
+        max-width: 100% !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      /* Que el certificado use TODO el ancho útil */
+      #vista-certificado.certificado-impresion {
+        max-width: none !important;
+        width: 100% !important;
+        border: 1px solid #ddd !important;
+        box-shadow: none !important;
+      }
+
+      .shadow {
+        box-shadow: none !important;
+      }
+
+      /* Tablas: evitar cortes feos */
+      table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+      }
+
+      thead {
+        display: table-header-group;
+      }
+
+      tr,
+      td,
+      th {
+        page-break-inside: avoid !important;
+      }
+
+      /* Firmas: no partirlas */
+      .firmas {
+        page-break-inside: avoid !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- HEADER -->
+  <header>
+    <button id="btnToggleSidebar" class="btn-toggle-sidebar" type="button" aria-label="Abrir menú">
+      ☰
+    </button>
+    <img src="/static/images/imagen.png" alt="logo de abaco">
+    <h5 class="mb-0"> <strong>DIOCESANO</strong></h5>
+    <div>
+      <!-- Dropdown usuario -->
+      <div class="dropdown">
+        <a class="d-flex align-items-center text-decoration-none dropdown-toggle" href="#" id="menuUsuario"
+          role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: inherit;">
+
+          <i class="bi bi-person-circle me-2"></i>
+          <strong>{{usuario}}</strong>
+        </a>
+
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuUsuario">
+          <li>
+            <a class="dropdown-item" href="{{url_for('rutas_dp.manual_usuario')}}" target="_blank">
+              <i class="bi bi-journal-text me-2"></i> Manual de usuario
+            </a>
+          </li>
+          <li>
+            <hr class="dropdown-divider">
+          </li>
+          <li>
+            <a class="dropdown-item text-danger" style="cursor: pointer;" onclick="cerrar()">
+              <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
+            </a>
+          </li>
+        </ul>
+      </div> <span class="noti-wrapper me-3 position-relative">
+        <i class="bi bi-bell-fill" id="iconoNotificaciones" style="cursor:pointer;"
+          onclick="mostrarNotificaciones()"></i>
+        <span id="badgeNotificaciones" class="badge-notify d-none">0</span>
+      </span>
+
+    </div>
+
+  </header>
+
+  <div class="main-layout">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <a href="{{ url_for('rutas_dp.menu_central') }}"><i class="bi bi-house-door-fill"></i><span>Inicio</span></a>
+      <a href="{{ url_for('rutas_dp.menu_de_parroquias') }}"><i class="bi bi-bank"></i><span>Organizaciones</span></a>
+      <a href="{{ url_for('rutas_dp.menu_producto') }}"><i class="bi bi-bookmark-plus"></i><span>Productos</span></a>
+      <a href="{{ url_for('rutas_dp.menu_donante') }}"><i class="bi bi-people-fill"></i><span>Donantes</span></a>
+      <a href="{{ url_for('rutas_dp.pagina_principal') }}"><i class="bi bi-heart-fill"></i><span>Entradas</span></a>
+      <a href="{{ url_for('rutas_dp.lista_donaciones') }}"><i class="bi bi-bag-check"></i><span>Lista de
+          Entradas</span></a>
+      <a href="{{ url_for('rutas_dp.tabla_producto') }}"><i class="bi bi-table"></i><span>Inventario</span></a>
+      <a href="{{ url_for('rutas_dp.movimiento_inv') }}"><i class="bi bi-box-arrow-right"></i><span>Salidas</span></a>
+      <a href="{{ url_for('rutas_dp.lista_salidas') }}"><i class="bi bi-card-checklist"></i><span> Lista de
+          Salidas</span></a>
+      <a href="{{ url_for('rutas_dp.menu_gastos') }}"><i class="bi bi-box-seam"></i><span>Reportes de Salidas</span></a>
+      <a href="{{ url_for('rutas_dp.menu_reportes') }}"><i class="bi bi-graph-up"></i><span>Reportes y
+          Certificados</span></a>
+      <a href="{{ url_for('rutas_dp.pag_confi') }}"><i class="bi bi-gear-fill"></i><span>Configuración</span></a>
+      <a class="mt-auto" style="cursor: row-resize;" onclick="cerrar()"><i class="bi bi-box-arrow-left"></i><span>Cerrar
+          sesión</span></a>
+    </div>
+
+
+    <!-- CONTENIDO -->
+    <div class="container my-4">
+      <div class="bg-white p-4 rounded shadow position-relative">
+
+        <!-- Botones superiores -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <button class="btn btn-outline-success" id="btnVolver" onclick="history.back()">
+            <i class="bi bi-arrow-left"></i> Volver
+          </button>
+
+          <button class="btn btn-success d-none" id="btnImprimirCertificado">
+            <i class="bi bi-printer"></i> Imprimir
+          </button>
+        </div>
+
+        <h1 class="h4 mb-4">Certificado de Donante</h1>
+
+        <!-- =======================
+             FILTROS / FORMULARIO
+        ======================== -->
+        <form id="formFiltrosCertificado" class="mb-4">
+          <!-- Donante -->
+          <div class="mb-3">
+            <label class="form-label">Documento de identidad</label>
+            <input type="text" id="docDonanteCert" class="form-control" placeholder="CC o NIT del donante">
+            <label for="">Nombre del donante</label>
+            <input type="text" id="nombreDonanteCert" class="form-control mt-2" placeholder="Nombre del donante"
+              readonly>
+            <input type="hidden" id="idDonanteCert">
+          </div>
+
+          <!-- Rango de fechas -->
+          <div class="row mb-3">
+            <div class="col-md-3">
+              <label class="form-label">Desde</label>
+              <input type="date" id="desdeCert" class="form-control">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Hasta</label>
+              <input type="date" id="hastaCert" class="form-control">
+            </div>
+          </div>
+
+          <!-- Tipo de certificado -->
+          <div class="mb-3">
+            <label class="form-label d-block">Tipo de certificado</label>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="tipoCert" id="tipoProductos" value="productos" checked>
+              <label class="form-check-label" for="tipoProductos">Donaciones en productos</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="tipoCert" id="tipoMonetaria" value="monetaria">
+              <label class="form-check-label" for="tipoMonetaria">Donaciones monetarias</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="tipoCert" id="tipoAmbos" value="ambos">
+              <label class="form-check-label" for="tipoAmbos">Ambos tipos</label>
+            </div>
+          </div>
+
+          <!-- Botón generar -->
+          <div class="mb-3 text-end">
+            <button type="button" id="btnGenerarCert" class="btn btn-success">
+              <i class="bi bi-file-earmark-text"></i> Generar certificado
+            </button>
+          </div>
+        </form>
+
+        <!-- Mensaje de carga / errores -->
+        <div id="cert-mensaje-cargando" class="alert alert-info py-2 mb-3 d-none">
+          Cargando información del certificado...
+        </div>
+
+        <!-- =======================
+             VISTA DEL CERTIFICADO
+        ======================== -->
+        <div id="vista-certificado" class="certificado-impresion border rounded p-4 d-none">
+
+          <!-- Encabezado: logo + datos organización -->
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <div id="cert-nombre-organizacion" class="fw-bold">Nombre de la organización</div>
+              <div id="cert-ciudad" class="small text-muted">Ciudad</div>
+              <div id="cert-direccion" class="small text-muted"></div>
+              <div id="cert-telefono" class="small text-muted"></div>
+              <div id="cert-nit" class="small text-muted"></div>
+            </div>
+            <div class="text-end">
+              <!-- Logo, lo puede reemplazar el JS si hay ruta_logo -->
+              <img id="cert-logo" src="/static/images/imagen.png" alt="Logo" style="max-height:80px;">
+            </div>
+          </div>
+
+          <!-- Título / Encabezado del certificado -->
+          <h2 class="text-center my-4" id="cert-texto-encabezado">
+            CERTIFICADO DE DONACIÓN
+          </h2>
+
+          <!-- Párrafo principal (intro) -->
+          <p id="cert-parrafo-intro" class="mt-3">
+            <!-- JS: “Se certifica que el(la) señor(a) ...” -->
+          </p>
+
+          <!-- Si hay bloque de productos -->
+          <div id="bloque-productos" class="mt-3 d-none">
+            <p class="mb-1"><strong>Detalle de donaciones en productos:</strong></p>
+            <div class="table-responsive">
+              <table class="table table-sm table-bordered align-middle mb-3" id="tabla-detalles-cert">
+                <thead class="table-light">
+                  <tr>
+                    <th>Producto</th>
+                    <th>Categoría</th>
+                    <th class="text-end">Cantidad</th>
+                    <th class="text-end">Peso total (kg)</th>
+                    <th class="text-end">Valor total</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-detalles-cert">
+                  <!-- Filas generadas por JS -->
+                </tbody>
+              </table>
+            </div>
+
+            <p class="mt-2">
+              En total se recibió el equivalente a
+              <strong><span id="cert-total-kg">0</span> kg</strong>
+              <span id="wrapper-total-valor" class="d-none">
+                , por un valor estimado de
+                <strong>$ <span id="cert-total-valor">0</span></strong>
+              </span>.
+            </p>
+          </div>
+
+          <!-- Bloque donaciones monetarias -->
+          <div id="bloque-monetaria" class="mt-3 d-none">
+            <p class="mb-1"><strong>Donaciones monetarias:</strong></p>
+            <p class="mb-1">
+              Total donado en dinero:
+              <strong>$ <span id="cert-total-monetario">0</span></strong>
+            </p>
+            <p class="mb-0">
+              Primera donación registrada: <span id="cert-primer-monetaria">-</span><br>
+              Última donación registrada: <span id="cert-ultima-monetaria">-</span>
+            </p>
+          </div>
+
+          <!-- Despedida -->
+          <p class="mt-4" id="cert-texto-despedida">
+            <!-- El JS pondrá aquí texto_despedida -->
+          </p>
+
+          <!-- Lugar y fecha -->
+          <p class="mt-3 text-end">
+            <span id="cert-lugar-fecha"></span>
+          </p>
+
+          <!-- Firma -->
+          <!-- Firmas -->
+          <div class="firmas mt-5">
+            <div class="firma-col">
+              <div class="firma-linea"></div>
+              <div class="firma-titulo">Elaborado por</div>
+              <div class="firma-nombre">{{ usuario }}</div>
+            </div>
+
+            <div class="firma-col">
+              <div class="firma-linea"></div>
+              <div class="firma-titulo">Administrador</div>
+              <div class="firma-nombre" id="cert-firma-admin">____________________</div>
+            </div>
+
+            <!-- Solo si es monetaria o ambos -->
+            <div class="firma-col d-none" id="firma-contadora">
+              <div class="firma-linea"></div>
+              <div class="firma-titulo">Contador(a)
+              </div>
+              <div class="firma-nombre" id="cert-firma-contadora">____________________</div>
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+    </div>
+
+  </div> <!-- /main-layout -->
+  <img src="/static/images/favicon.png" alt="header icon" style="
+        width: 30px;
+        height: 30px;
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+z-index: 999;">
+  <script>
+    function cerrar() {
+      window.location.href = "/logout";
+    }
+  </script>
+  <script src="/static/js/notificacion.js"></script>
+  <script src="/static/js/resaltar.js"></script>
+  <script src="/static/js/time.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/static/js/certificacion_donante.js"></script>
+  <script>
+    resaltar();
+  </script>
+</body>
+
+</html>

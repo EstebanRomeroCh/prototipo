@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ÁBACO DIOCESANO</title>
+    <link rel="stylesheet" href="/static/css/general.css">
+    <link rel="shortcut icon" href="/static/images/favicon.png" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+</head>
+<style>
+    .modal-header {
+        border-bottom: 2px solid #0a8f4d;
+    }
+
+    .table td,
+    .table th {
+        vertical-align: middle;
+    }
+</style>
+
+<body>
+    <!-- HEADER -->
+    <header>
+    <button id="btnToggleSidebar" class="btn-toggle-sidebar" type="button" aria-label="Abrir menú">
+      ☰
+    </button>
+    <img src="/static/images/imagen.png" alt="logo de abaco">
+    <h5 class="mb-0"> <strong>DIOCESANO</strong></h5>
+    <div>
+      <!-- Dropdown usuario -->
+      <div class="dropdown">
+        <a class="d-flex align-items-center text-decoration-none dropdown-toggle" href="#" id="menuUsuario"
+          role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: inherit;">
+
+          <i class="bi bi-person-circle me-2"></i>
+          <strong>{{usuario}}</strong>
+        </a>
+
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuUsuario">
+          <li>
+            <a class="dropdown-item" href="{{url_for('rutas_dp.manual_usuario')}}" target="_blank">
+              <i class="bi bi-journal-text me-2"></i> Manual de usuario
+            </a>
+          </li>
+          <li>
+            <hr class="dropdown-divider">
+          </li>
+          <li>
+            <a class="dropdown-item text-danger" style="cursor: pointer;" onclick="cerrar()">
+              <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
+            </a>
+          </li>
+        </ul>
+      </div> <span class="noti-wrapper me-3 position-relative">
+        <i class="bi bi-bell-fill" id="iconoNotificaciones" style="cursor:pointer;"
+          onclick="mostrarNotificaciones()"></i>
+        <span id="badgeNotificaciones" class="badge-notify d-none">0</span>
+      </span>
+
+    </div>
+
+  </header>
+
+    <!-- LAYOUT: SIDEBAR + CONTENT -->
+    <div class="main-layout">
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <a href="{{ url_for('rutas_dp.menu_central') }}"><i
+                    class="bi bi-house-door-fill"></i><span>Inicio</span></a>
+            <a href="{{ url_for('rutas_dp.menu_de_parroquias') }}"><i
+                    class="bi bi-bank"></i><span>Organizaciones</span></a>
+            <a href="{{ url_for('rutas_dp.menu_producto') }}"><i
+                    class="bi bi-bookmark-plus"></i><span>Productos</span></a>
+            <a href="{{ url_for('rutas_dp.menu_donante') }}"><i class="bi bi-people-fill"></i><span>Donantes</span></a>
+            <a href="{{ url_for('rutas_dp.pagina_principal') }}"><i
+                    class="bi bi-heart-fill"></i><span>Entradas</span></a>
+            <a href="{{ url_for('rutas_dp.lista_donaciones') }}"><i class="bi bi-bag-check"></i><span>Lista de
+                    Entradas</span></a>
+            <a href="{{ url_for('rutas_dp.tabla_producto') }}"><i class="bi bi-table"></i><span>Inventario</span></a>
+            <a href="{{ url_for('rutas_dp.movimiento_inv') }}"><i
+                    class="bi bi-box-arrow-right"></i><span>Salidas</span></a>
+            <a href="{{ url_for('rutas_dp.lista_salidas') }}"><i class="bi bi-card-checklist"></i><span> Lista de
+                    Salidas</span></a>
+            <a href="{{ url_for('rutas_dp.menu_gastos') }}"><i class="bi bi-box-seam"></i><span>Reportes de
+                    Salidas</span></a>
+            <a href="{{ url_for('rutas_dp.menu_reportes') }}"><i class="bi bi-graph-up"></i><span>Reportes y
+                    Certificados</span></a>
+            <a href="{{ url_for('rutas_dp.pag_confi') }}"><i class="bi bi-gear-fill"></i><span>Configuración</span></a>
+            <a class="mt-auto" style="cursor: row-resize;" onclick="cerrar()"><i
+                    class="bi bi-box-arrow-left"></i><span>Cerrar
+                    sesión</span></a>
+        </div>
+
+
+        <!-- CONTENIDO -->
+        <div class="container my-4">
+
+            <div class="container bg-white p-4 rounded shadow">
+                <!-- 🔹 Botón de regresar en la esquina del formulario -->
+                <a href="{{ url_for('rutas_dp.menu_central') }}" class="btn btn-outline-success btn-sm ">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <h1>Lista de Entradas</h1>
+
+
+                <!-- Encabezado -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="btn-group" role="group">
+                        <button id="btnProducto" class="btn btn-success active">Producto</button>
+                        <button id="btnMonetaria" class="btn btn-outline-success">Monetaria</button>
+                    </div>
+
+                    <select role="search" id="filtroTipoEntrada" class="form-select">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-body">
+
+                        <!-- Tabla Producto -->
+                        <div id="tablaProducto">
+                            <h5 class="mb-3">Donaciones de Productos</h5>
+                            <div class="table-responsive">
+                                <table class="table table-bordered align-middle">
+                                    <thead class="table-success">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Donante o (Proveedor)</th>
+                                            <th>Tipo de entrada</th>
+                                            <th>Fecha Ingreso</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+
+                                    <!-- 🔥 AQUÍ SE INSERTAN LOS DATOS -->
+                                    <tbody id="tbodyProductos"></tbody>
+
+                                </table>
+                            </div>
+                        </div>
+
+
+                        <!-- Tabla Monetaria -->
+                        <div id="tablaMonetaria" class="d-none">
+                            <h5 class="mb-3">Donaciones Monetarias</h5>
+                            <div class="table-responsive">
+                                <table class="table table-bordered align-middle">
+                                    <thead class="table-success">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Donante</th>
+                                            <th>Monto</th>
+                                            <th>Fecha</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+
+                                    <!-- 🔥 AQUÍ SE INSERTAN LOS DATOS -->
+                                    <tbody id="tbodyMonetaria"></tbody>
+
+                                </table>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================================= -->
+            <!-- MODAL PARA EDITAR DONACIÓN DE PRODUCTO -->
+            <!-- ========================================================= -->
+            <!-- MODAL EDITAR DONACIÓN DE PRODUCTOS -->
+            <div class="modal fade" id="modalEditarDonacion" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header bg-success text-white">
+                            <h5 class="modal-title">Editar donación de productos</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                aria-label="Cerrar"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <form id="formEditarDonacion" onsubmit="event.preventDefault(); guardarEdicionDonacion();">
+
+                                <!-- CABECERA -->
+                                <div class="tarjeta mb-3">
+                                    <h5>Datos del donante / entrada</h5>
+                                    <input type="hidden" id="edit_idDonante">
+
+                                    <div class="row g-3">
+                                        <div class="col-md-3">
+                                            <label class="form-label">Documento</label>
+                                            <input type="text" id="edit_docDonante" class="form-control"
+                                                placeholder="CC o NIT">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Donante</label>
+                                            <input type="text" id="edit_nombreDonante" class="form-control" readonly>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Fecha de ingreso</label>
+                                            <input type="date" id="edit_fechaEntrada" class="form-control">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label">Tipo de entrada</label>
+                                            <select id="edit_tipoEntradaSelect" class="form-select"></select>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3 mt-3">
+                                        <div class="col-md-4" id="contenedorEditResponsable">
+                                            <label class="form-label">Responsable</label>
+                                            <input type="text" id="edit_responsable" class="form-control"
+                                                placeholder="Nombre responsable">
+                                        </div>
+                                        <div class="col-md-8">
+                                            <label class="form-label">Observación</label>
+                                            <input type="text" id="edit_observacion" class="form-control"
+                                                placeholder="Detalle de la donación">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- DETALLES PRODUCTOS -->
+                                <div class="tarjeta">
+                                    <h5>Productos de la donación</h5>
+                                    <div class="table-responsive">
+                                        <h5>Productos de la donación</h5>
+
+                                        <!-- 🔹 Formulario para agregar NUEVOS productos en edición -->
+                                        <div class="card mb-3">
+                                            <div class="card-body">
+                                                <div class="row g-3 align-items-end">
+                                                    <div class="col-md-3">
+                                                        <label class="form-label">Nombre del producto</label>
+                                                        <input type="text" id="editProd_nombre" class="form-control"
+                                                            placeholder="Ej: Arroz">
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <label class="form-label">Categoría</label>
+                                                        <input type="text" id="editProd_categoria" class="form-control"
+                                                            readonly>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <label class="form-label">Cantidad</label>
+                                                        <input type="number" id="editProd_cantidad" class="form-control"
+                                                            value="1" min="1" step="1">
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <label class="form-label">Unidad</label>
+                                                        <input type="text" id="editProd_unidad" class="form-control"
+                                                            readonly>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label class="form-label">Peso unitario</label>
+                                                        <input type="number" id="editProd_peso" class="form-control"
+                                                            min="0.01" step="0.01">
+                                                    </div>
+                                                </div>
+
+                                                <div class="row g-3 align-items-end mt-2">
+                                                    <div class="col-md-3">
+                                                        <label class="form-label">Bodega</label>
+                                                        <select id="editProd_bodegaSelect" class="form-select">
+                                                            <option value="">Seleccione la bodega...</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label class="form-label">Valor</label>
+                                                        <input type="number" id="editProd_valor" class="form-control"
+                                                            min="0" step="100">
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label class="form-label">Fecha de vencimiento</label>
+                                                        <input type="date" id="editProd_vencimiento"
+                                                            class="form-control">
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <button type="button" class="btn btn-success w-100 mt-4"
+                                                            onclick="agregarProductoEdicion()">
+                                                            Agregar producto
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 🔹 Tabla de productos ya agregados -->
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered align-middle">
+                                                <thead class="table-success">
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Producto</th>
+                                                        <th>Cantidad</th>
+                                                        <th>Peso / Unidad</th>
+                                                        <th>Bodega</th>
+                                                        <th>Valor</th>
+                                                        <th>Vencimiento</th>
+                                                        <th>Acción</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="tbodyEditarProductos"></tbody>
+                                            </table>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-end mt-3">
+                                    <button type="button" class="btn btn-secondary me-2"
+                                        data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="button" class="btn btn-success" onclick="guardarEdicionDonacion()">
+                                        Guardar
+                                    </button>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MODAL EDITAR DONACIÓN MONETARIA -->
+            <div class="modal fade" id="modalEditarMonetaria" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header bg-success text-white">
+                            <h5 class="modal-title">Editar donación monetaria</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                aria-label="Cerrar"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <form id="formEditarMonetaria"
+                                onsubmit="event.preventDefault(); guardarEdicionMonetaria();">
+
+                                <input type="hidden" id="editMon_idDonante">
+
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Documento donante</label>
+                                        <input type="text" id="editMon_docDonante" class="form-control">
+                                    </div>
+                                    <div class="col-md-5">
+                                        <label class="form-label">Nombre donante</label>
+                                        <input type="text" id="editMon_nombreDonante" class="form-control" readonly>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Fecha donación</label>
+                                        <input type="date" id="editMon_fecha" class="form-control">
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mt-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Monto</label>
+                                        <input type="number" id="editMon_monto" class="form-control" min="1"
+                                            step="0.01">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Método</label>
+                                        <select id="editMon_metodo" class="form-select"></select>
+                                    </div>
+                                    <div class="col-md-12 mt-3">
+                                        <label class="form-label">Descripción</label>
+                                        <input type="text" id="editMon_descripcion" class="form-control">
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-end mt-3">
+                                    <button type="button" class="btn btn-secondary me-2"
+                                        data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-success">Guardar cambios</button>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
+
+        </div>
+    </div>
+
+
+    <img src="/static/images/favicon.png" alt="header icon" style="
+        width: 30px;
+        height: 30px;
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+z-index: 999;">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/resaltar.js"></script>
+    <script src="/static/js/notificacion.js"></script>
+    <script src="/static/js/time.js"></script>
+
+    <script>
+        resaltar()
+    </script>
+    <script src="/static/js/lista_donaciones.js"></script>
+
+    <!-- Script -->
+
+</body>
+
+</html>

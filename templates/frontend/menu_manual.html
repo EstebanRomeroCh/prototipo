@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ÁBACO DIOCESANO</title>
+    <link rel="stylesheet" href="/static/css/general.css">
+    <link rel="shortcut icon" href="/static/images/favicon.png" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+    <style>
+        .cuadro-container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header>
+    <button id="btnToggleSidebar" class="btn-toggle-sidebar" type="button" aria-label="Abrir menú">
+      ☰
+    </button>
+    <img src="/static/images/imagen.png" alt="logo de abaco">
+    <h5 class="mb-0"> <strong>DIOCESANO</strong></h5>
+    <div>
+      <!-- Dropdown usuario -->
+      <div class="dropdown">
+        <a class="d-flex align-items-center text-decoration-none dropdown-toggle" href="#" id="menuUsuario"
+          role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: inherit;">
+
+          <i class="bi bi-person-circle me-2"></i>
+          <strong>{{usuario}}</strong>
+        </a>
+
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuUsuario">
+          <li>
+            <a class="dropdown-item" href="{{url_for('rutas_dp.manual_usuario')}}" target="_blank">
+              <i class="bi bi-journal-text me-2"></i> Manual de usuario
+            </a>
+          </li>
+          <li>
+            <hr class="dropdown-divider">
+          </li>
+          <li>
+            <a class="dropdown-item text-danger" style="cursor: pointer;" onclick="cerrar()">
+              <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
+            </a>
+          </li>
+        </ul>
+      </div> <span class="noti-wrapper me-3 position-relative">
+        <i class="bi bi-bell-fill" id="iconoNotificaciones" style="cursor:pointer;"
+          onclick="mostrarNotificaciones()"></i>
+        <span id="badgeNotificaciones" class="badge-notify d-none">0</span>
+      </span>
+
+    </div>
+
+  </header>
+
+    <!-- LAYOUT -->
+    <div class="main-layout">
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <a href="{{ url_for('rutas_dp.menu_central') }}"><i
+                    class="bi bi-house-door-fill"></i><span>Inicio</span></a>
+            <a href="{{ url_for('rutas_dp.menu_de_parroquias') }}"><i
+                    class="bi bi-bank"></i><span>Organizaciones</span></a>
+            <a href="{{ url_for('rutas_dp.menu_producto') }}"><i
+                    class="bi bi-bookmark-plus"></i><span>Productos</span></a>
+            <a href="{{ url_for('rutas_dp.menu_donante') }}"><i class="bi bi-people-fill"></i><span>Donantes</span></a>
+            <a href="{{ url_for('rutas_dp.pagina_principal') }}"><i
+                    class="bi bi-heart-fill"></i><span>Entradas</span></a>
+            <a href="{{ url_for('rutas_dp.lista_donaciones') }}"><i class="bi bi-bag-check"></i><span>Lista de
+                    Entradas</span></a>
+            <a href="{{ url_for('rutas_dp.tabla_producto') }}"><i class="bi bi-table"></i><span>Inventario</span></a>
+            <a href="{{ url_for('rutas_dp.movimiento_inv') }}"><i
+                    class="bi bi-box-arrow-right"></i><span>Salidas</span></a>
+            <a href="{{ url_for('rutas_dp.lista_salidas') }}"><i class="bi bi-card-checklist"></i><span> Lista de
+                    Salidas</span></a>
+            <a href="{{ url_for('rutas_dp.menu_gastos') }}"><i class="bi bi-box-seam"></i><span>Reportes de
+                    Salidas</span></a>
+            <a href="{{ url_for('rutas_dp.menu_reportes') }}"><i class="bi bi-graph-up"></i><span>Reportes y
+                    Certificados</span></a>
+            <a href="{{ url_for('rutas_dp.pag_confi') }}"><i class="bi bi-gear-fill"></i><span>Configuración</span></a>
+            <a class="mt-auto" style="cursor: row-resize;" onclick="cerrar()"><i
+                    class="bi bi-box-arrow-left"></i><span>Cerrar
+                    sesión</span></a>
+        </div>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <div class="container my-4">
+
+            <div class="container bg-white p-4 rounded shadow">
+
+                <h1>Manual del Software</h1>
+                <div class="row g-4 justify-content-center">
+
+                    <!-- Tipo de organización -->
+                    <div class="col-12 col-sm-4 col-md-3 col-lg-3">
+                        <div class="card text-center p-3"
+                            onclick="window.location.href='{{ url_for('rutas_dp.tecnico') }}'">
+                            <svg class="mx-auto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+                                <!-- Libro base -->
+                                <path fill="none"
+                                    d="M18 12h28c2.21 0 4 1.79 4 4v32c0 2.21-1.79 4-4 4H18c-2.21 0-4-1.79-4-4V16c0-2.21 1.79-4 4-4z"
+                                    stroke="currentColor" stroke-width="1" />
+
+                                <!-- Páginas internas -->
+                                <path fill="none" d="M20 16v28h24V16" stroke="currentColor" stroke-width="0.5" />
+
+                                <!-- Engranaje técnico -->
+                                <path fill="none" d="M40 28c0-2.21-1.79-4-4-4s-4 1.79-4 4 1.79 4 4 4 4-1.79 4-4z"
+                                    stroke="currentColor" stroke-width="1" />
+                                <path fill="none"
+                                    d="M36 24v-3M36 32v3M40 26h3M32 26h-3M39 29l2 2M33 23l-2-2M39 23l2-2M33 29l-2 2"
+                                    stroke="currentColor" stroke-width="1" />
+
+                                <!-- Líneas de código -->
+                                <path fill="none" d="M24 22h8M24 26h12M24 30h10M24 34h14" stroke="currentColor"
+                                    stroke-width="1" />
+                            </svg>
+                            <div class="card-body p-0">
+                                <p class="card-text">Manuales Técnicos</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Parroquias -->
+                    <div class="col-12 col-sm-4 col-md-3 col-lg-3">
+                        <div class="card text-center p-3"
+                            onclick="window.location.href='{{ url_for('rutas_dp.manual_usuario') }}'">
+                            <svg class="mx-auto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+                                <!-- Dispositivo -->
+                                <path fill="none" d="M16 16h32v24H16z" stroke="currentColor" stroke-width="1" />
+                                <path fill="none" d="M20 20h24v16H20z" stroke="currentColor" stroke-width="0.5" />
+
+                                <!-- Elementos de UI -->
+                                <circle cx="24" cy="22" r="1" fill="none" stroke="currentColor" stroke-width="1" />
+                                <circle cx="28" cy="22" r="1" fill="none" stroke="currentColor" stroke-width="1" />
+                                <circle cx="32" cy="22" r="1" fill="none" stroke="currentColor" stroke-width="1" />
+                                <path fill="none" d="M22 28h20M22 32h16M22 36h18" stroke="currentColor"
+                                    stroke-width="1" />
+
+                                <!-- Persona observando -->
+                                <circle cx="48" cy="40" r="6" fill="none" stroke="currentColor" stroke-width="1" />
+                                <path fill="none" d="M48 46v4M48 46l-4 2M48 46l4 2" stroke="currentColor"
+                                    stroke-width="1" />
+
+                                <!-- Línea de vista -->
+                                <path fill="none" d="M44 40l-4-4" stroke="currentColor" stroke-width="0.5"
+                                    stroke-dasharray="2,2" />
+                            </svg>
+                            <div class="card-body p-0">
+                                <p class="card-text">Manuales de usuario</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fundaciones -->
+                    <div class="col-12 col-sm-4 col-md-3 col-lg-3">
+                        <div class="card text-center p-3"
+                            onclick="window.location.href='{{ url_for('rutas_dp.instalacion') }}'">
+                            <svg class="mx-auto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+                                <!-- Servidor/CPU -->
+                                <path fill="none"
+                                    d="M16 20h32c1.1 0 2 .9 2 2v20c0 1.1-.9 2-2 2H16c-1.1 0-2-.9-2-2V22c0-1.1.9-2 2-2z"
+                                    stroke="currentColor" stroke-width="1" />
+
+                                <!-- Paneles frontales -->
+                                <path fill="none"
+                                    d="M20 24h4v4h-4zM28 24h4v4h-4zM36 24h4v4h-4zM20 32h4v4h-4zM28 32h4v4h-4zM36 32h4v4h-4zM20 40h4v4h-4zM28 40h4v4h-4z"
+                                    stroke="currentColor" stroke-width="1" />
+
+                                <!-- Base -->
+                                <path fill="none" d="M22 50h20v2H22zM26 52h12v4H26z" stroke="currentColor"
+                                    stroke-width="1" />
+
+                                <!-- Check de instalación completa -->
+                                <path fill="none" d="M50 16l4 4 6-8" stroke="currentColor" stroke-width="1.5" />
+                                <circle cx="54" cy="14" r="8" fill="none" stroke="currentColor" stroke-width="1" />
+
+                                <!-- Flechas de proceso -->
+                                <path fill="none" d="M48 12h-4M48 16h-4M56 12h2M56 16h2" stroke="currentColor"
+                                    stroke-width="1" />
+                            </svg>
+                            <div class="card-body p-0">
+                                <p class="card-text">Manuales de instalación</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <img src="/static/images/favicon.png" alt="header icon" style="
+        width: 30px;
+        height: 30px;
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+z-index: 999;">
+    <script src="/static/js/resaltar.js"></script>
+    <script src="/static/js/notificacion.js"></script>
+    <script src="/static/js/time.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        resaltar()
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Subcategorías</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f5f5f5;
+    }
+    h1, h2 {
+      color: #2c3e50;
+    }
+    form, table {
+      background-color: #fff;
+      padding: 15px;
+      margin-bottom: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    input, select {
+      margin-bottom: 10px;
+      padding: 8px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #2980b9;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1c5980;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Registrar Nueva Subcategoría</h1>
+  <button onclick="window.history.back()">⬅ Volver</button><br><br>
+
+  <form id="formSubcategoria">
+    <select id="categoriaSelect" required>
+      <option value="">Selecciona una categoría</option>
+    </select>
+    <input type="text" id="nombreSubcategoria" placeholder="Nombre de la subcategoría" required>
+    <input type="text" id="descripcionSubcategoria" placeholder="Descripción de la subcategoría" required>
+    <button type="submit">Guardar Subcategoría</button>
+  </form>
+
+  <h2>Lista de Subcategorías</h2>
+  <table id="tablaSubcategorias">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Descripción</th>
+        <th>Categoría</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    // Simulamos categorías registradas previamente
+    const categorias = [
+      { id: 1, nombre: "Alimentos" },
+      { id: 2, nombre: "Limpieza" },
+      { id: 3, nombre: "Tecnología" }
+    ];
+
+    const categoriaSelect = document.getElementById('categoriaSelect');
+    const formSubcategoria = document.getElementById('formSubcategoria');
+    const tablaSubcategorias = document.getElementById('tablaSubcategorias').querySelector('tbody');
+
+    let idSubcategoria = 1;
+    let editandoSubcategoria = null;
+
+    // Llenar el select con categorías
+    function cargarCategorias() {
+      categorias.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat.nombre;
+        option.textContent = cat.nombre;
+        categoriaSelect.appendChild(option);
+      });
+    }
+
+    cargarCategorias();
+
+    formSubcategoria.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const categoria = categoriaSelect.value;
+      const nombre = document.getElementById('nombreSubcategoria').value.trim();
+      const descripcion = document.getElementById('descripcionSubcategoria').value.trim();
+
+      if (!categoria || !nombre || !descripcion) return;
+
+      if (editandoSubcategoria) {
+        editandoSubcategoria.querySelector('.col-categoria').textContent = categoria;
+        editandoSubcategoria.querySelector('.col-nombre').textContent = nombre;
+        editandoSubcategoria.querySelector('.col-descripcion').textContent = descripcion;
+        editandoSubcategoria = null;
+      } else {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="col-id">${String(idSubcategoria).padStart(3, '0')}</td>
+          <td class="col-nombre">${nombre}</td>
+          <td class="col-descripcion">${descripcion}</td>
+          <td class="col-categoria">${categoria}</td>
+          <td>
+            <button onclick="editarSubcategoria(this)">Editar</button>
+            <button onclick="eliminarSubcategoria(this)">Eliminar</button>
+          </td>
+        `;
+        tablaSubcategorias.appendChild(row);
+        idSubcategoria++;
+      }
+
+      formSubcategoria.reset();
+    });
+
+    function eliminarSubcategoria(btn) {
+      const row = btn.closest('tr');
+      row.remove();
+    }
+
+    function editarSubcategoria(btn) {
+      const row = btn.closest('tr');
+      document.getElementById('nombreSubcategoria').value = row.querySelector('.col-nombre').textContent;
+      document.getElementById('descripcionSubcategoria').value = row.querySelector('.col-descripcion').textContent;
+      categoriaSelect.value = row.querySelector('.col-categoria').textContent;
+
+      editandoSubcategoria = row;
+    }
+  </script>
+
+</body>
+</html>

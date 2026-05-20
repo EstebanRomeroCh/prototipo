@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Comprobante de Salida</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/static/css/general.css" />
+  <link rel="shortcut icon" href="/static/images/favicon.png" type="image/x-icon" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+  <style>
+    .salida-impresion {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #ffffff;
+    }
+
+    .firmas{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  margin-top: 20px;
+}
+
+.firma-col{
+  padding-top: 10px;
+}
+
+.firma-linea{
+  border-top: 1px solid #000;
+  margin-bottom: 8px;
+}
+
+.firma-titulo{
+  font-weight: 600;
+}
+
+.firma-texto{
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+    @media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  /* Ocultar botones y elementos web */
+  .acciones, .no-print {
+    display: none !important;
+  }
+
+  /* Quitar márgenes/paddings que achican el comprobante */
+  body {
+    background: #fff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Bootstrap container achica el contenido: lo liberamos */
+  .container, .my-4 {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Tu comprobante no debe quedarse en max-width 900 en impresión */
+  .salida-impresion {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* La tarjeta no debe tener sombra y debe ocupar el ancho */
+  .shadow {
+    box-shadow: none !important;
+  }
+
+  /* Tablas: evitar que se partan filas */
+  table { width: 100% !important; border-collapse: collapse !important; }
+  thead { display: table-header-group; }
+  tr, td, th { page-break-inside: avoid !important; }
+  #vista-comprobante, .firmas { page-break-inside: avoid !important; }
+}
+
+  </style>
+</head>
+
+<body>
+  <!-- HEADER -->
+
+
+  <div class="main-layout">
+    <!-- Puedes dejar la sidebar igual que en el resto del sistema -->
+
+
+    <!-- CONTENIDO -->
+    <div class="container my-4">
+      <div class="bg-white p-4 rounded shadow salida-impresion position-relative">
+
+        <!-- ID de la salida para el JS -->
+        <input type="hidden" id="idSalida" value="{{ id_salida }}">
+
+        <!-- Botones -->
+        
+        <h1 class="h4 text-center mb-4">Comprobante de Salida de Donación</h1>
+        
+        <!-- Mensaje de carga -->
+        <div id="salida-mensaje-cargando" class="alert alert-info py-2 mb-3">
+          Cargando información de la salida...
+        </div>
+        
+        <!-- CONTENIDO DEL COMPROBANTE -->
+        <div id="vista-comprobante">
+
+          <!-- Encabezado: Número, fecha, tipo -->
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <div><strong>Salida N°:</strong> <span id="comp-numero"></span></div>
+              <div><strong>Tipo de salida:</strong> <span id="comp-tipo-salida"></span></div>
+            </div>
+            <div class="text-end">
+              <div><strong>Fecha de salida:</strong> <span id="comp-fecha-salida"></span></div>
+            </div>
+          </div>
+          
+          <hr>
+          
+          <!-- Datos beneficiario -->
+          <h5>Datos del Beneficiario</h5>
+          <div class="row mb-2">
+            <div class="col-md-6">
+              <div><strong>Parroquia / Organización:</strong> <span id="comp-parroquia"></span></div>
+              <div><strong>Encargado:</strong> <span id="comp-encargado"></span></div>
+              <div><strong>Documento:</strong> <span id="comp-documento"></span></div>
+            </div>
+            <div class="col-md-6">
+              <div><strong>Teléfono:</strong> <span id="comp-telefono"></span></div>
+              <div><strong>Dirección:</strong> <span id="comp-direccion"></span></div>
+              <div><strong>Ciudad:</strong> <span id="comp-ciudad"></span></div>
+            </div>
+          </div>
+          
+          <hr>
+
+          <!-- Tabla de productos -->
+          <h5>Detalle de productos entregados</h5>
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Producto</th>
+                  <th>Categoría</th>
+                  <th>Bodega / Ubicación</th>
+                  <th>Fecha de vencimiento</th>
+                  <th class="text-end">Cantidad (kg)</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-detalle-salida">
+                <tr>
+                  <td colspan="5" class="text-center">Cargando...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <p class="mt-2">
+            <strong>Total entregado:</strong>
+            <span id="comp-total-kg">0</span> kg
+          </p>
+          
+          <!-- Observación -->
+          <h6 class="mt-3">Observación</h6>
+          <p id="comp-observacion" class="border rounded p-2" style="min-height:60px;"></p>
+          <hr class="mt-4">
+
+<div class="firmas">
+  <div class="firma-col">
+    <div class="firma-linea"></div>
+    <div class="firma-titulo">Firma de quien recibe</div>
+    <div class="firma-texto">
+      Nombre: <span id="firma-recibe-nombre">____________________</span>
+    </div>
+    <div class="firma-texto">Documento: ____________________</div>
+  </div>
+
+  <div class="firma-col">
+    <div class="firma-linea"></div>
+    <div class="firma-titulo">Firma de quien realiza la salida</div>
+      <div class="firma-texto">Nombre: <span id="firma-realiza-nombre">____________________</span> </div>
+      <div class="firma-texto">Cargo: ____________________</div>
+  </div>
+</div>
+
+        </div>
+        <div class="acciones mx-auto mt-4 text-center no-print">
+      
+          
+          <button onclick="window.print()" class="btn btn-success" id="btnImprimir">
+            <i class="bi bi-printer"></i> Imprimir
+          </button>
+          <button onclick="guardarPDF()" class="btn btn-success"> Guardar PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    function cerrar() {
+      window.location.href = "/logout";
+    }
+
+    function guardarPDF() {
+      window.print();
+    }
+
+  </script>
+  <script src="/static/js/notificacion.js"></script>
+  <script src="/static/js/resaltar.js"></script>
+  <script src="/static/js/comprobante_salida.js"></script>
+  <script>
+    resaltar();
+  </script>
+</body>
+
+</html>

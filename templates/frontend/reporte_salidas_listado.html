@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <title>ÁBACO DIOCESANO</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="/static/css/general.css">
+  <link rel="shortcut icon" href="/static/images/favicon.png" type="image/x-icon">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+ <header>
+    <button id="btnToggleSidebar" class="btn-toggle-sidebar" type="button" aria-label="Abrir menú">
+      ☰
+    </button>
+    <img src="/static/images/imagen.png" alt="logo de abaco">
+    <h5 class="mb-0"> <strong>DIOCESANO</strong></h5>
+    <div>
+      <!-- Dropdown usuario -->
+      <div class="dropdown">
+        <a class="d-flex align-items-center text-decoration-none dropdown-toggle" href="#" id="menuUsuario"
+          role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: inherit;">
+
+          <i class="bi bi-person-circle me-2"></i>
+          <strong>{{usuario}}</strong>
+        </a>
+
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuUsuario">
+          <li>
+            <a class="dropdown-item" href="{{url_for('rutas_dp.manual_usuario')}}" target="_blank">
+              <i class="bi bi-journal-text me-2"></i> Manual de usuario
+            </a>
+          </li>
+          <li>
+            <hr class="dropdown-divider">
+          </li>
+          <li>
+            <a class="dropdown-item text-danger" style="cursor: pointer;" onclick="cerrar()">
+              <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
+            </a>
+          </li>
+        </ul>
+      </div> <span class="noti-wrapper me-3 position-relative">
+        <i class="bi bi-bell-fill" id="iconoNotificaciones" style="cursor:pointer;"
+          onclick="mostrarNotificaciones()"></i>
+        <span id="badgeNotificaciones" class="badge-notify d-none">0</span>
+      </span>
+
+    </div>
+
+  </header>
+
+  <!-- LAYOUT -->
+  <div class="main-layout">
+    <div class="sidebar">
+      <a href="{{ url_for('rutas_dp.menu_central') }}"><i class="bi bi-house-door-fill"></i><span>Inicio</span></a>
+      <a href="{{ url_for('rutas_dp.menu_de_parroquias') }}"><i class="bi bi-bank"></i><span>Organizaciones</span></a>
+      <a href="{{ url_for('rutas_dp.menu_producto') }}"><i class="bi bi-bookmark-plus"></i><span>Productos</span></a>
+      <a href="{{ url_for('rutas_dp.menu_donante') }}"><i class="bi bi-people-fill"></i><span>Donantes</span></a>
+      <a href="{{ url_for('rutas_dp.pagina_principal') }}"><i class="bi bi-heart-fill"></i><span>Entradas</span></a>
+      <a href="{{ url_for('rutas_dp.lista_donaciones') }}"><i class="bi bi-bag-check"></i><span>Lista de
+          Entradas</span></a>
+      <a href="{{ url_for('rutas_dp.tabla_producto') }}"><i class="bi bi-table"></i><span>Inventario</span></a>
+      <a href="{{ url_for('rutas_dp.movimiento_inv') }}"><i class="bi bi-box-arrow-right"></i><span>Salidas</span></a>
+      <a href="{{ url_for('rutas_dp.lista_salidas') }}"><i class="bi bi-card-checklist"></i><span> Lista de
+          Salidas</span></a>
+      <a href="{{ url_for('rutas_dp.menu_gastos') }}"><i class="bi bi-box-seam"></i><span>Reportes de Salidas</span></a>
+      <a href="{{ url_for('rutas_dp.menu_reportes') }}"><i class="bi bi-graph-up"></i><span>Reportes y
+          Certificados</span></a>
+      <a href="{{ url_for('rutas_dp.pag_confi') }}"><i class="bi bi-gear-fill"></i><span>Configuración</span></a>
+      <a class="mt-auto" style="cursor: row-resize;" onclick="cerrar()"><i class="bi bi-box-arrow-left"></i><span>Cerrar
+          sesión</span></a>
+    </div>
+    <div class="container my-4">
+      <div class="container bg-white p-4 rounded shadow">
+
+        <a href="{{ url_for('rutas_dp.menu_gastos') }}" class="btn btn-outline-success btn-sm">
+          <i class="bi bi-arrow-left"></i>
+        </a>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h1 class="mb-0">Reporte de Salidas (detalle por salida)</h1>
+
+          <button id="btnExcel" class="btn btn-success d-flex align-items-center"> <i
+              class="bi bi-file-earmark-excel me-1"></i>Exportar Excel</button>
+
+        </div>
+        <div class="container bg-white p-4 rounded shadow">
+
+
+          <div class="row g-2 align-items-end mb-3">
+
+            <div class="col-md-2">
+              <label class="form-label">Desde</label>
+              <input type="date" id="desde" class="form-control">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Hasta</label>
+              <input type="date" id="hasta" class="form-control">
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Tipo salida</label>
+              <select id="id_tipo_salida" class="form-select">
+                <option value="">Todos</option>
+                {% for t in tipos_salida %}
+                <option value="{{t.id_tipo_salida}}">{{t.nombre}}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-md-2">
+              <label class="form-label">Estado</label>
+              <select id="estado" class="form-select">
+                <option value="">Todos</option>
+                <option value="Activo">Activo</option>
+                <option value="Anulado">Anulado</option>
+              </select>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Buscar (id/beneficiario/doc)</label>
+              <input type="text" id="q" class="form-control" placeholder="Ej: 12 o Alta Gracia">
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Beneficiario tipo</label>
+              <select id="beneficiario_tipo" class="form-select">
+                <option value="">Todos</option>
+                <option value="Parroquia">Parroquia</option>
+                <option value="Fundacion">Fundación</option>
+              </select>
+            </div>
+
+            <div class="col-md-3 d-flex gap-2">
+              <button id="btnBuscar" class="btn btn-success w-100">Buscar</button>
+              <button id="btnLimpiar" class="btn btn-outline-success w-100">Limpiar</button>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end mb-2">
+            <strong id="totalesTxt">Total período: 0 kg | $ 0</strong>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>ID salida</th>
+                  <th>Fecha</th>
+                  <th>Tipo</th>
+                  <th>Estado</th>
+                  <th>Beneficiario</th>
+                  <th>Documento</th>
+                  <th class="text-end">Total (kg)</th>
+                  <th class="text-end">Valor</th>
+                  <th>Observación</th>
+                  <th>Acciones</th>
+
+                </tr>
+              </thead>
+              <tbody id="tbodySalidas"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal fade" id="modalDetalleSalida" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Detalle de salida</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+
+              <div class="modal-body">
+                <div id="detalleCabecera" class="mb-3"></div>
+
+                <div class="table-responsive">
+                  <table class="table table-bordered align-middle">
+                    <thead class="table-light">
+                      <tr>
+                        <th>Producto</th>
+                        <th>Categoría</th>
+                        <th>Bodega</th>
+                        <th>Ubicación</th>
+                        <th>Vence</th>
+                        <th class="text-end">Cantidad (kg)</th>
+                        <th class="text-end">Valor</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tbodyDetalleSalida"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="modal-footer">
+                <!-- Comprobante: abre una ruta (la definimos abajo en JS) -->
+                <a id="btnComprobante" class="btn btn-success" target="_blank" rel="noopener">Ver comprobante</a>
+
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+        <script src="/static/js/reporte_salidas_listado.js"></script>
+        <script src="/static/js/notificacion.js"></script>
+        <script src="/static/js/resaltar.js"></script>
+</body>
+
+</html>
