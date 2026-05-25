@@ -3,6 +3,7 @@
 from flask import Blueprint, render_template, session, redirect, url_for, request, jsonify
 from database import get_db_connection
 import pymysql   # 👈 IMPORTANTE para DictCursor
+from psycopg2.extras import RealDictCursor
 
 bitacora_bp = Blueprint('bitacora_bp', __name__)
 
@@ -63,7 +64,7 @@ def data_bitacora():
 
     try:
         # 👇 AQUÍ USAMOS DictCursor DE PYMysql (NADA DE dictionary=True)
-        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        cursor = conn.cursor(cursor_factory=RealDictCursor) 
 
         sql = f"""
             SELECT
@@ -110,5 +111,5 @@ def data_bitacora():
 
     finally:
         if cursor:
-            cursor.close()
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
         conn.close()

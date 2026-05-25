@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, session, redirect, url_for, jsonif
 from functools import wraps
 import pymysql
 from database import get_db_connection
+from psycopg2.extras import RealDictCursor
 
 # ==============================
 # 4️ PÁGINA PRINCIPAL (POST LOGIN)
@@ -62,7 +63,7 @@ def login_required(f):
             flash("Error al conectar con la base de datos.", "danger")
             return redirect(url_for('rutas_dp.index'))
 
-        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
         cursor.execute(
             "SELECT estado FROM usuarios WHERE id_usuario = %s LIMIT 1",
             (session.get("id_usuario"),)

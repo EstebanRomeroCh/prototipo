@@ -5,6 +5,7 @@ from flask import Blueprint, request, jsonify, render_template, redirect, url_fo
 from db import get_db_connection
 from utils.bitacora import registrar_bitacora
 import pymysql
+from psycopg2.extras import RealDictCursor
 
 tipo_donante_bp = Blueprint(
     'tipo_donante_bp',
@@ -25,7 +26,7 @@ def tipo_donante_page():
         descripcion = request.form.get('descripcionTipo', '')
 
         conn = get_db_connection()
-        cursor = conn.cursor()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
         try:
             cursor.execute(
                 "INSERT INTO tipo_donante (nombre, descripcion) VALUES (%s, %s)",
@@ -52,7 +53,7 @@ def tipo_donante_page():
 @tipo_donante_bp.route('/api/tipo_donante', methods=['GET'])
 def listar_tipo_donante():
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     cursor.execute("SELECT * FROM tipo_donante")
     tipos = cursor.fetchall()
     cursor.close()
@@ -67,7 +68,7 @@ def crear_tipo_donante():
     descripcion = data.get('descripcion', '')
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         cursor.execute(
             "INSERT INTO tipo_donante (nombre, descripcion) VALUES (%s, %s)",
@@ -94,7 +95,7 @@ def actualizar_tipo_donante(id_tipo):
     estado = data.get('estado', 'Activo')
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         cursor.execute(
             "UPDATE tipo_donante SET nombre=%s, descripcion=%s, estado=%s WHERE id_tipo=%s",
@@ -115,7 +116,7 @@ def actualizar_tipo_donante(id_tipo):
 @tipo_donante_bp.route('/api/tipo_donante/<int:id_tipo>', methods=['DELETE'])
 def eliminar_tipo_donante(id_tipo):
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         cursor.execute("DELETE FROM tipo_donante WHERE id_tipo=%s", (id_tipo,))
         conn.commit()

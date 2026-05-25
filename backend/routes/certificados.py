@@ -5,6 +5,7 @@ from db import get_db_connection
 from datetime import datetime
 from decimal import Decimal
 from utils.bitacora import registrar_bitacora
+from psycopg2.extras import RealDictCursor
 
 
 certificados_bp = Blueprint(
@@ -35,7 +36,7 @@ def certificado_por_entrada(id_entrada):
         return jsonify({'success': False, 'message': 'Sesión expirada'}), 401
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         # 2) Obtener parámetros del certificado
@@ -128,7 +129,7 @@ def certificado_monetaria(id_donacion):
         return jsonify({'success': False, 'message': 'Sesión expirada'}), 401
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         # 1) Traer el último registro de parámetros
@@ -262,7 +263,7 @@ def certificado_por_donante():
             }), 400
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         # -----------------------------

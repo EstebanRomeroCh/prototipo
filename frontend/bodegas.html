@@ -1,109 +1,126 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="UTF-8" />
-<title>Gestión de Bodegas</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-    background-color: #f5f5f5;
-  }
-  h1, h2 {
-    color: #2c3e50;
-  }
-  form, table {
-    background-color: #fff;
-    padding: 15px;
-    margin-bottom: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  }
-  input, textarea {
-    margin-bottom: 10px;
-    padding: 8px;
-    width: 100%;
-    box-sizing: border-box;
-  }
-  textarea {
-    resize: vertical;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  table, th, td {
-    border: 1px solid #ccc;
-  }
-  th, td {
-    padding: 10px;
-    text-align: left;
-    vertical-align: top;
-  }
-  button {
-    padding: 10px 15px;
-    background-color: #2980b9;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  button:hover {
-    background-color: #1c5980;
-  }
-</style>
-</head>
-<body>
-
-<h1>Gestión de Bodegas</h1>
-
-<form id="formBodega">
-  <input type="text" id="nombreBodega" placeholder="Nombre de la bodega" required />
-  <textarea id="direccionBodega" placeholder="Dirección y ubicación" rows="3" required></textarea>
-  <input type="number" id="capacidadBodega" placeholder="Capacidad de almacenamiento" min="1" required />
-  <button type="submit">Guardar Bodega</button>
-</form>
-
-<h2>Lista de Bodegas</h2>
-<table id="tablaBodegas">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Nombre</th>
-      <th>Dirección</th>
-      <th>Capacidad</th>
-      <th>Acciones</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
-
-<script>
-  const formBodega = document.getElementById('formBodega');
-  const tablaBodegas = document.getElementById('tablaBodegas').querySelector('tbody');
-  let idBodega = 1;
-  let editandoBodega = null;
-
-  formBodega.addEventListener('submit', e => {
-    e.preventDefault();
-
-    const nombre = document.getElementById('nombreBodega').value.trim();
-    const direccion = document.getElementById('direccionBodega').value.trim();
-    const capacidad = document.getElementById('capacidadBodega').value;
-
-    if (!nombre || !direccion || !capacidad || capacidad <= 0) {
-      alert('Por favor completa todos los campos correctamente.');
-      return;
+  <meta charset="UTF-8" />
+  <title>Gestión de Bodegas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f5f5f5;
     }
 
-    if (editandoBodega) {
-      editandoBodega.querySelector('.col-nombre').textContent = nombre;
-      editandoBodega.querySelector('.col-direccion').textContent = direccion;
-      editandoBodega.querySelector('.col-capacidad').textContent = capacidad;
-      editandoBodega = null;
-    } else {
-      const row = document.createElement('tr');
-      row.innerHTML = `
+    h1,
+    h2 {
+      color: #2c3e50;
+    }
+
+    form,
+    table {
+      background-color: #fff;
+      padding: 15px;
+      margin-bottom: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    input,
+    textarea {
+      margin-bottom: 10px;
+      padding: 8px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    table,
+    th,
+    td {
+      border: 1px solid #ccc;
+    }
+
+    th,
+    td {
+      padding: 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    button {
+      padding: 10px 15px;
+      background-color: #2980b9;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #1c5980;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Gestión de Bodegas</h1>
+
+  <form id="formBodega">
+    <input type="text" id="nombreBodega" placeholder="Nombre de la bodega" required />
+    <textarea id="direccionBodega" placeholder="Dirección y ubicación" rows="3" required></textarea>
+    <input type="number" id="capacidadBodega" placeholder="Capacidad de almacenamiento" min="1" required />
+    <button type="submit">Guardar Bodega</button>
+  </form>
+
+  <h2>Lista de Bodegas</h2>
+  <table id="tablaBodegas">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Dirección</th>
+        <th>Capacidad</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const formBodega = document.getElementById('formBodega');
+    const tablaBodegas = document.getElementById('tablaBodegas').querySelector('tbody');
+    let idBodega = 1;
+    let editandoBodega = null;
+
+    formBodega.addEventListener('submit', e => {
+      e.preventDefault();
+
+      const nombre = document.getElementById('nombreBodega').value.trim();
+      const direccion = document.getElementById('direccionBodega').value.trim();
+      const capacidad = document.getElementById('capacidadBodega').value;
+
+      if (!nombre || !direccion || !capacidad || capacidad <= 0) {
+        alert('Por favor completa todos los campos correctamente.');
+        return;
+      }
+
+      if (editandoBodega) {
+        editandoBodega.querySelector('.col-nombre').textContent = nombre;
+        editandoBodega.querySelector('.col-direccion').textContent = direccion;
+        editandoBodega.querySelector('.col-capacidad').textContent = capacidad;
+        editandoBodega = null;
+      } else {
+        const row = document.createElement('tr');
+        row.innerHTML = `
         <td>${String(idBodega).padStart(3, '0')}</td>
         <td class="col-nombre">${nombre}</td>
         <td class="col-direccion">${direccion}</td>
@@ -113,27 +130,28 @@
           <button onclick="eliminarBodega(this)">Eliminar</button>
         </td>
       `;
-      tablaBodegas.appendChild(row);
-      idBodega++;
+        tablaBodegas.appendChild(row);
+        idBodega++;
+      }
+
+      formBodega.reset();
+    });
+
+    function eliminarBodega(btn) {
+      const row = btn.closest('tr');
+      if (editandoBodega === row) editandoBodega = null;
+      row.remove();
     }
 
-    formBodega.reset();
-  });
-
-  function eliminarBodega(btn) {
-    const row = btn.closest('tr');
-    if (editandoBodega === row) editandoBodega = null;
-    row.remove();
-  }
-
-  function editarBodega(btn) {
-    const row = btn.closest('tr');
-    document.getElementById('nombreBodega').value = row.querySelector('.col-nombre').textContent;
-    document.getElementById('direccionBodega').value = row.querySelector('.col-direccion').textContent;
-    document.getElementById('capacidadBodega').value = row.querySelector('.col-capacidad').textContent;
-    editandoBodega = row;
-  }
-</script>
+    function editarBodega(btn) {
+      const row = btn.closest('tr');
+      document.getElementById('nombreBodega').value = row.querySelector('.col-nombre').textContent;
+      document.getElementById('direccionBodega').value = row.querySelector('.col-direccion').textContent;
+      document.getElementById('capacidadBodega').value = row.querySelector('.col-capacidad').textContent;
+      editandoBodega = row;
+    }
+  </script>
 
 </body>
+
 </html>

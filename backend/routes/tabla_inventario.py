@@ -9,6 +9,7 @@ from datetime import date
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment
 from openpyxl.utils import get_column_letter
+from psycopg2.extras import RealDictCursor
 
 
 tabla_inventario = Blueprint('tabla_inventario', __name__)
@@ -24,7 +25,7 @@ def _obtener_productos_inventario(q: str):
     q = (q or "").strip()
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     filtros = ["p.estado = 'Activo'", "COALESCE(inv.cantidad_total, 0) > 0"]
     params = []
@@ -50,15 +51,15 @@ def _obtener_productos_inventario(q: str):
                 SELECT
                     ed2.fecha_vencimiento,
                     (
-                      SUM(ed2.peso_total_kg)
-                      - COALESCE(SUM(
-                          CASE WHEN s2.estado = 'Activo' THEN sd2.cantidad_kg ELSE 0 END
+                        SUM(ed2.peso_total_kg)
+                        - COALESCE(SUM(
+                            CASE WHEN s2.estado = 'Activo' THEN sd2.cantidad_kg ELSE 0 END
                         ), 0)
                     ) AS stock_kg
                 FROM entrada_detalles ed2
                 JOIN entradas e2
                     ON e2.id_entrada = ed2.id_entrada
-                   AND e2.estado = 'Activo'
+                    AND e2.estado = 'Activo'
                 LEFT JOIN salida_detalles sd2
                     ON sd2.id_entrada_detalle = ed2.id_detalle
                 LEFT JOIN salidas s2
@@ -78,15 +79,15 @@ def _obtener_productos_inventario(q: str):
                     b3.nombre_bodega,
                     ed3.bodega_texto,
                     (
-                      SUM(ed3.peso_total_kg)
-                      - COALESCE(SUM(
-                          CASE WHEN s3.estado = 'Activo' THEN sd3.cantidad_kg ELSE 0 END
+                        SUM(ed3.peso_total_kg)
+                        - COALESCE(SUM(
+                            CASE WHEN s3.estado = 'Activo' THEN sd3.cantidad_kg ELSE 0 END
                         ), 0)
                     ) AS stock_kg
                 FROM entrada_detalles ed3
                 JOIN entradas e3
                     ON e3.id_entrada = ed3.id_entrada
-                   AND e3.estado = 'Activo'
+                    AND e3.estado = 'Activo'
                 JOIN bodegas b3
                     ON b3.id_bodega = ed3.id_bodega
                 LEFT JOIN salida_detalles sd3
@@ -107,15 +108,15 @@ def _obtener_productos_inventario(q: str):
                     ed4.fecha_vencimiento,
                     ed4.bodega_texto,
                     (
-                      SUM(ed4.peso_total_kg)
-                      - COALESCE(SUM(
-                          CASE WHEN s4.estado = 'Activo' THEN sd4.cantidad_kg ELSE 0 END
+                        SUM(ed4.peso_total_kg)
+                        - COALESCE(SUM(
+                            CASE WHEN s4.estado = 'Activo' THEN sd4.cantidad_kg ELSE 0 END
                         ), 0)
                     ) AS stock_kg
                 FROM entrada_detalles ed4
                 JOIN entradas e4
                     ON e4.id_entrada = ed4.id_entrada
-                   AND e4.estado = 'Activo'
+                    AND e4.estado = 'Activo'
                 LEFT JOIN salida_detalles sd4
                     ON sd4.id_entrada_detalle = ed4.id_detalle
                 LEFT JOIN salidas s4
@@ -142,9 +143,9 @@ def _obtener_productos_inventario(q: str):
         ed.id_producto,
         ed.fecha_vencimiento,
         (
-          SUM(ed.peso_total_kg)
-          - COALESCE(SUM(
-              CASE WHEN s.estado = 'Activo' THEN sd.cantidad_kg ELSE 0 END
+            SUM(ed.peso_total_kg)
+            - COALESCE(SUM(
+                CASE WHEN s.estado = 'Activo' THEN sd.cantidad_kg ELSE 0 END
             ), 0)
         ) AS stock_kg,
         b.nombre_bodega,
@@ -152,7 +153,7 @@ def _obtener_productos_inventario(q: str):
     FROM entrada_detalles ed
     JOIN entradas e
         ON e.id_entrada = ed.id_entrada
-       AND e.estado = 'Activo'
+        AND e.estado = 'Activo'
     JOIN bodegas b
         ON b.id_bodega = ed.id_bodega
     LEFT JOIN salida_detalles sd
@@ -205,7 +206,7 @@ def api_productos_inventario():
     q = request.args.get('q', '').strip()
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     # --------- FILTROS ----------
     filtros = ["p.estado = 'Activo'", "COALESCE(inv.cantidad_total, 0) > 0"]
@@ -235,15 +236,15 @@ def api_productos_inventario():
                 SELECT
                     ed2.fecha_vencimiento,
                     (
-                      SUM(ed2.peso_total_kg)
-                      - COALESCE(SUM(
-                          CASE WHEN s2.estado = 'Activo' THEN sd2.cantidad_kg ELSE 0 END
+                        SUM(ed2.peso_total_kg)
+                        - COALESCE(SUM(
+                            CASE WHEN s2.estado = 'Activo' THEN sd2.cantidad_kg ELSE 0 END
                         ), 0)
                     ) AS stock_kg
                 FROM entrada_detalles ed2
                 JOIN entradas e2
                     ON e2.id_entrada = ed2.id_entrada
-                   AND e2.estado = 'Activo'
+                    AND e2.estado = 'Activo'
                 LEFT JOIN salida_detalles sd2
                     ON sd2.id_entrada_detalle = ed2.id_detalle
                 LEFT JOIN salidas s2
@@ -265,15 +266,15 @@ def api_productos_inventario():
                     b3.nombre_bodega,
                     ed3.bodega_texto,
                     (
-                      SUM(ed3.peso_total_kg)
-                      - COALESCE(SUM(
-                          CASE WHEN s3.estado = 'Activo' THEN sd3.cantidad_kg ELSE 0 END
+                        SUM(ed3.peso_total_kg)
+                        - COALESCE(SUM(
+                            CASE WHEN s3.estado = 'Activo' THEN sd3.cantidad_kg ELSE 0 END
                         ), 0)
                     ) AS stock_kg
                 FROM entrada_detalles ed3
                 JOIN entradas e3
                     ON e3.id_entrada = ed3.id_entrada
-                   AND e3.estado = 'Activo'
+                    AND e3.estado = 'Activo'
                 JOIN bodegas b3
                     ON b3.id_bodega = ed3.id_bodega
                 LEFT JOIN salida_detalles sd3
@@ -296,15 +297,15 @@ def api_productos_inventario():
                     ed4.fecha_vencimiento,
                     ed4.bodega_texto,
                     (
-                      SUM(ed4.peso_total_kg)
-                      - COALESCE(SUM(
-                          CASE WHEN s4.estado = 'Activo' THEN sd4.cantidad_kg ELSE 0 END
+                        SUM(ed4.peso_total_kg)
+                        - COALESCE(SUM(
+                            CASE WHEN s4.estado = 'Activo' THEN sd4.cantidad_kg ELSE 0 END
                         ), 0)
                     ) AS stock_kg
                 FROM entrada_detalles ed4
                 JOIN entradas e4
                     ON e4.id_entrada = ed4.id_entrada
-                   AND e4.estado = 'Activo'
+                    AND e4.estado = 'Activo'
                 LEFT JOIN salida_detalles sd4
                     ON sd4.id_entrada_detalle = ed4.id_detalle
                 LEFT JOIN salidas s4
@@ -333,9 +334,9 @@ def api_productos_inventario():
         ed.id_producto,
         ed.fecha_vencimiento,
         (
-          SUM(ed.peso_total_kg)
-          - COALESCE(SUM(
-              CASE WHEN s.estado = 'Activo' THEN sd.cantidad_kg ELSE 0 END
+            SUM(ed.peso_total_kg)
+            - COALESCE(SUM(
+                CASE WHEN s.estado = 'Activo' THEN sd.cantidad_kg ELSE 0 END
             ), 0)
         ) AS stock_kg,
         b.nombre_bodega,
@@ -343,7 +344,7 @@ def api_productos_inventario():
     FROM entrada_detalles ed
     JOIN entradas e
         ON e.id_entrada = ed.id_entrada
-       AND e.estado = 'Activo'
+        AND e.estado = 'Activo'
     JOIN bodegas b
         ON b.id_bodega = ed.id_bodega
 

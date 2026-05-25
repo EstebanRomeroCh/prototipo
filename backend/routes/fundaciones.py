@@ -4,6 +4,7 @@ from flask import Blueprint, render_template, session, redirect, url_for, jsonif
 from database import get_db_connection
 import pymysql
 from utils.bitacora import registrar_bitacora
+from psycopg2.extras import RealDictCursor
 
 fundaciones_bp = Blueprint(
     "fundaciones_bp",
@@ -34,7 +35,7 @@ def api_tipos_organizacion():
         return jsonify({"success": False, "message": "Sesión expirada"}), 401
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         cursor.execute("""
@@ -64,7 +65,7 @@ def api_tipos_documento():
         return jsonify({"success": False, "message": "Sesión expirada"}), 401
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         cursor.execute("""
@@ -96,7 +97,7 @@ def api_listar_fundaciones():
     q = (request.args.get("q") or "").strip()
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         filtros = ["p.estado = 'Activo'"]
@@ -129,7 +130,7 @@ def api_listar_fundaciones():
                 p.municipio,
                 p.estado,
                 p.fecha_registro
-            FROM fundacioines p
+            FROM fundaciones p
             JOIN tipos_organizacion to_org
                 ON to_org.id_tipo_organizacion = p.id_tipo_organizacion
             JOIN tipo_documento td
@@ -158,7 +159,7 @@ def api_obtener_fundacion(id_fundaciones):
         return jsonify({"success": False, "message": "Sesión expirada"}), 401
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         cursor.execute("""
@@ -177,7 +178,7 @@ def api_obtener_fundacion(id_fundaciones):
                 p.municipio,
                 p.estado,
                 p.fecha_registro
-            FROM fundacioines p
+            FROM fundaciones p
             WHERE p.id_fundaciones = %s
             LIMIT 1
         """, (id_fundaciones,))
@@ -231,11 +232,11 @@ def api_crear_fundacion():
         return jsonify({"success": False, "message": "Familias atendidas debe ser un número válido (>= 0)."}), 400
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         cursor.execute("""
-            INSERT INTO fundacioines (
+            INSERT INTO fundaciones(
                 id_tipo_organizacion,
                 tipo_doc_id,
                 nombre,
@@ -274,7 +275,7 @@ def api_crear_fundacion():
                 modulo="FUNDACIONES",
                 accion="CREAR",
                 descripcion=f"Creó fundación '{nombre}' (ID {nuevo_id}).",
-                tabla_afectada="fundacioines",
+                tabla_afectada="fundaciones",
                 id_registro=nuevo_id
             )
         conn.commit()
@@ -332,11 +333,11 @@ def api_actualizar_fundacion(id_fundaciones):
         return jsonify({"success": False, "message": "Familias atendidas debe ser un número válido (>= 0)."}), 400
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         cursor.execute(
-            "SELECT id_fundaciones FROM fundacioines WHERE id_fundaciones = %s",
+            "SELECT id_fundaciones FROM fundacionesWHERE id_fundaciones = %s",
             (id_fundaciones,)
         )
         if not cursor.fetchone():
@@ -404,11 +405,11 @@ def api_eliminar_fundacion(id_fundaciones):
         return jsonify({"success": False, "message": "Sesión expirada"}), 401
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         cursor.execute(
-            "SELECT id_fundaciones FROM fundacioines WHERE id_fundaciones = %s",
+            "SELECT id_fundaciones FROM fundacionesWHERE id_fundaciones = %s",
             (id_fundaciones,)
         )
         if not cursor.fetchone():

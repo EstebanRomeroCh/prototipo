@@ -6,6 +6,7 @@ import pymysql
 from decimal import Decimal, InvalidOperation
 from datetime import datetime
 from utils.bitacora import registrar_bitacora   # si ya la tienes y quieres registrar acciones
+from psycopg2.extras import RealDictCursor
 
 salidas_bp = Blueprint('salidas_bp', __name__, url_prefix='/salidas')
 
@@ -44,7 +45,7 @@ def nueva_salida():
         return redirect(url_for('index'))
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         cursor.execute("""
             SELECT id_tipo_salida, nombre
@@ -77,7 +78,7 @@ def api_tipos_salida():
         return jsonify({'success': False, 'message': 'Sesión expirada'}), 401
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         cursor.execute("""
             SELECT id_tipo_salida, nombre, descripcion
@@ -103,11 +104,11 @@ def api_tipos_salida():
 def api_beneficiarios():
     """
     Devuelve beneficiarios activos:
-      - Parroquias (tabla parroquias)
-      - Fundaciones (tabla fundacioines)
+        - Parroquias (tabla parroquias)
+        - Fundaciones (tabla fundacioines)
 
     Query param:
-      - q: filtra por nombre o numero_documento
+        - q: filtra por nombre o numero_documento
     """
     if 'usuario' not in session:
         return jsonify({'success': False, 'message': 'Sesión expirada'}), 401
@@ -115,7 +116,7 @@ def api_beneficiarios():
     q = (request.args.get('q') or '').strip()
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         filtros_p = ["p.estado = 'Activo'"]
         filtros_f = ["f.estado = 'Activo'"]
@@ -185,7 +186,7 @@ def api_lotes_disponibles():
     """
     Lotes disponibles por detalle de entrada con stock > 0.
     Parámetro opcional:
-      - q: filtrar por nombre de producto o id_producto
+        - q: filtrar por nombre de producto o id_producto
     """
     if 'usuario' not in session:
         return jsonify({'success': False, 'message': 'Sesión expirada'}), 401
@@ -193,7 +194,7 @@ def api_lotes_disponibles():
     q = (request.args.get('q') or '').strip()
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         filtros = ["e.estado = 'Activo'"]
         params = []
@@ -288,14 +289,14 @@ def api_crear_salida():
     """
     JSON esperado:
     {
-      "tipo_beneficiario": "Parroquia" | "Fundacion",
-      "id_beneficiario": 10,
-      "id_tipo_salida": 1,
-      "fecha_salida": "YYYY-MM-DD" (opcional),
-      "observacion": "...",
-      "detalles": [
+        "tipo_beneficiario": "Parroquia" | "Fundacion",
+        "id_beneficiario": 10,
+        "id_tipo_salida": 1,
+        "fecha_salida": "YYYY-MM-DD" (opcional),
+        "observacion": "...",
+        "detalles": [
         { "id_entrada_detalle": 5, "cantidad_kg": 12.5, "valor_unitario": 0 }
-      ]
+        ]
     }
     """
     if 'usuario' not in session:
@@ -328,7 +329,7 @@ def api_crear_salida():
     id_fundaciones = int(id_beneficiario) if tipo_beneficiario == "Fundacion" else None
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         conn.autocommit(False)
@@ -394,7 +395,7 @@ def api_crear_salida():
                 FROM entrada_detalles ed
                 JOIN entradas e ON e.id_entrada = ed.id_entrada
                 WHERE ed.id_detalle = %s
-                  AND e.estado = 'Activo'
+                    AND e.estado = 'Activo'
                 LIMIT 1
             """, (id_entrada_detalle,))
             lote = cursor.fetchone()
@@ -543,7 +544,7 @@ def api_detalle_salida(id_salida):
         return jsonify({'success': False, 'message': 'Sesión expirada'}), 401
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         cursor.execute("""
@@ -658,8 +659,8 @@ def vista_lista_salidas():
 def api_lista_salidas():
     """
     Filtros:
-      - estado: 'Activo' | 'Anulado' (vacío = todos)
-      - id_tipo_salida: int
+        - estado: 'Activo' | 'Anulado' (vacío = todos)
+        - id_tipo_salida: int
     """
     if 'usuario' not in session:
         return jsonify({'success': False, 'message': 'Sesión expirada'}), 401
@@ -668,7 +669,7 @@ def api_lista_salidas():
     id_tipo_salida = request.args.get('id_tipo_salida', type=int)
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         sql = """

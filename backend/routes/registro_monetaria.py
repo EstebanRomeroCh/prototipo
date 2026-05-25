@@ -5,6 +5,7 @@ from utils.bitacora import registrar_bitacora
 import os
 import uuid
 from werkzeug.utils import secure_filename
+from psycopg2.extras import RealDictCursor
 
 registro_monetaria_bp = Blueprint(
     'registro_monetaria_bp',
@@ -96,7 +97,7 @@ def registrar_donacion_monetaria():
         fecha_donacion = datetime.now().date()
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         # Validar donante
@@ -244,7 +245,7 @@ def editar_donacion_monetaria(id_donacion):
         return jsonify({'success': False, 'message': 'Monto inválido'}), 400
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         cursor.execute("""

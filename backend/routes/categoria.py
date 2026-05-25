@@ -3,6 +3,7 @@ from flask import Blueprint, request, jsonify, session
 from db import get_db_connection
 import pymysql
 from utils.bitacora import registrar_bitacora
+from psycopg2.extras import RealDictCursor
 categorias_bp = Blueprint('categorias_bp', __name__, url_prefix='/api/categorias')
 
 # ==============================
@@ -11,25 +12,27 @@ categorias_bp = Blueprint('categorias_bp', __name__, url_prefix='/api/categorias
 @categorias_bp.route('/', methods=['GET'])
 def listar_categorias():
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+
     try:
         cursor.execute("SELECT * FROM categorias")
         categorias = cursor.fetchall()
-        return jsonify(categorias)
+        return jsonify(categorias), 200
+
     except Exception as e:
         print("Error listar_categorias:", e)
         return jsonify({'success': False, 'message': str(e)}), 500
+
     finally:
         cursor.close()
         conn.close()
-
 # ==============================
 # OBTENER CATEGORIA POR ID
 # ==============================
 @categorias_bp.route('/<int:id_categoria>', methods=['GET'])
 def obtener_categoria(id_categoria):
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         cursor.execute("SELECT * FROM categorias WHERE id_categoria=%s", (id_categoria,))
         categoria = cursor.fetchone()
@@ -58,7 +61,7 @@ def crear_categoria():
         return jsonify({'success': False, 'message': 'El nombre es obligatorio'}), 400
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)  # <-- DictCursor
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         # Validar si ya existe
         cursor.execute("SELECT * FROM categorias WHERE nombre=%s", (nombre,))
@@ -104,7 +107,7 @@ def actualizar_categoria(id_categoria):
     estado = data.get('estado', 'Activo')
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)  # <-- DictCursor
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         cursor.execute("SELECT * FROM categorias WHERE id_categoria=%s", (id_categoria,))
         if not cursor.fetchone():
@@ -139,16 +142,14 @@ def actualizar_categoria(id_categoria):
         cursor.close()
         conn.close()
 
-# ==============================
-# ELIMINAR CATEGORIA
-# ==============================
+
 # ==============================
 # ELIMINAR CATEGORIA
 # ==============================
 @categorias_bp.route('/<int:id_categoria>', methods=['DELETE'])
 def eliminar_categoria(id_categoria):
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)  # <-- DictCursor
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         # Revisar subcategorías asociadas
         cursor.execute("SELECT id_subcategoria FROM subcategorias WHERE id_categoria=%s", (id_categoria,))

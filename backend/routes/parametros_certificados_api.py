@@ -3,6 +3,7 @@
 from flask import Blueprint, request, jsonify, session
 from db import get_db_connection
 from utils.bitacora import registrar_bitacora
+from psycopg2.extras import RealDictCursor
 
 parametros_certificados_api_bp = Blueprint(
     "parametros_certificados_api_bp",
@@ -52,7 +53,7 @@ def api_listar_parametros():
     q = (request.args.get("q") or "").strip()
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         sql = """
@@ -127,7 +128,7 @@ def api_crear_parametro():
         }), 400
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         cursor.execute("""
@@ -231,7 +232,7 @@ def api_actualizar_parametro(id_parametro):
         }), 400
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         # Verificar que exista
@@ -320,7 +321,7 @@ def api_eliminar_parametro(id_parametro):
         return jsonify({"success": False, "message": "Sesión expirada"}), 401
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         cursor.execute("""

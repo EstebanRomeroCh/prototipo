@@ -5,6 +5,7 @@ from database import get_db_connection
 import pymysql
 from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation
+from psycopg2.extras import RealDictCursor
 
 notificaciones_bp = Blueprint('notificaciones_bp', __name__, url_prefix='/api/notificaciones')
 
@@ -32,7 +33,7 @@ def obtener_notificaciones():
         return jsonify({'success': False, 'message': 'Sesión expirada'}), 401
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     hoy = date.today()
     dias_alerta = 7          # rango de "próximo a vencer"
@@ -58,9 +59,9 @@ def obtener_notificaciones():
             JOIN productos p  ON p.id_producto = ed.id_producto
             JOIN bodegas b    ON b.id_bodega = ed.id_bodega
             WHERE e.estado = 'Activo'
-              AND ed.fecha_vencimiento IS NOT NULL
-              AND ed.fecha_vencimiento >= %s
-              AND ed.fecha_vencimiento <= %s
+                AND ed.fecha_vencimiento IS NOT NULL
+                AND ed.fecha_vencimiento >= %s
+                AND ed.fecha_vencimiento <= %s
             GROUP BY
                 p.id_producto,
                 p.nombre,

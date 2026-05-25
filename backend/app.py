@@ -1,14 +1,15 @@
 from flask import Flask, request, jsonify, render_template, session, redirect, url_for, flash
 from flask_cors import CORS
 from datetime import datetime, timedelta
-from werkzeug.security import check_password_hash
 from flasgger import Swagger
 import os
-import pymysql
 
-
-# Conexión a la base de datos PyMySQL
+from werkzeug.security import check_password_hash  # 👈 AQUÍ
+from psycopg2.extras import RealDictCursor
+from db import get_db_connection
 from database import get_db_connection
+
+
 
 from routes.rutas import rutas_dp
 from routes.bitacora_admin import bitacora_bp
@@ -54,10 +55,16 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
 app = Flask(
     __name__,
-      #template_folder=os.path.join(BASE_DIR, 'templates'),
-      template_folder=os.path.join(BASE_DIR, 'templates', 'frontend'),
-      static_folder=os.path.join(BASE_DIR, 'static')
-      )
+    template_folder=os.path.join(BASE_DIR, 'templates', 'frontend'),
+    static_folder=os.path.join(BASE_DIR, 'static')
+)
+
+
+from supabase_config import SupabaseConfig
+
+app.config.from_object(SupabaseConfig)
+
+
 
 from decimal import Decimal, InvalidOperation  # puedes poner este import arriba con los otros
 
@@ -179,7 +186,7 @@ def login():
         return jsonify({'success': False, 'message': 'Error al conectar con la base de datos'}), 500
 
     try:
-        cursor = connection.cursor(pymysql.cursors.DictCursor)
+        cursor = connection.cursor(cursor_factory=RealDictCursor)
 
         cursor.execute("""
             SELECT * 
@@ -187,14 +194,14 @@ def login():
             WHERE correo = %s
             LIMIT 1
         """, (username,))
+
         user = cursor.fetchone()
 
         if not user:
-            return jsonify({'success': False, 'message': 'Usuario no registrado '}), 401
-        # Validar estado del usuario
+            return jsonify({'success': False, 'message': 'Usuario no registrado'}), 401
+
+        # Estado usuario
         if user.get("estado") != "Activo":
-            cursor.close()
-            connection.close()
             return jsonify({
                 'success': False,
                 'message': 'Usuario inactivo. Contacte al administrador.'
@@ -208,20 +215,17 @@ def login():
                 'message': f'Cuenta bloqueada. Intenta de nuevo en {tiempo_restante} minutos.'
             }), 403
 
-        # Validación de contraseña (hash)
+        # Password
         stored = (user.get("contrasena") or "").strip()
 
-# 1) Intentar como hash (Werkzeug)
         ok = False
         try:
             ok = check_password_hash(stored, password)
         except Exception:
             ok = False
 
-        # 2) Fallback: si NO era hash válido, probar texto plano (tu caso de MySQL)
         if not ok:
             ok = (stored == password)
-
 
         if ok:
             cursor.execute("""
@@ -231,24 +235,23 @@ def login():
             """, (user['id_usuario'],))
             connection.commit()
 
-            # Guardar sesión
             session['usuario'] = user['nombre_completo']
             session['rol_id'] = user['rol_id']
             session['id_usuario'] = user['id_usuario']
 
             cursor.execute("SELECT nombre FROM roles WHERE id_rol = %s", (user['rol_id'],))
             rol = cursor.fetchone()
-            session['rol_nombre'] = (rol or {}).get('nombre')
+            session['rol_nombre'] = rol.get('nombre') if rol else None
 
             return jsonify({'success': True})
 
-        # Password incorrecta -> subir intentos
+        # Login fallido
         nuevos_intentos = int(user.get('intentos_fallidos') or 0) + 1
         bloqueado_hasta = None
 
         if nuevos_intentos >= 3:
             bloqueado_hasta = datetime.now() + timedelta(hours=2)
-            mensaje = "Cuenta bloqueada por 2 horas debido a múltiples intentos fallidos."
+            mensaje = "Cuenta bloqueada por 2 horas."
         else:
             mensaje = f"Contraseña incorrecta. Intento {nuevos_intentos}/3."
 
@@ -257,6 +260,7 @@ def login():
             SET intentos_fallidos = %s, bloqueado_hasta = %s 
             WHERE id_usuario = %s
         """, (nuevos_intentos, bloqueado_hasta, user['id_usuario']))
+
         connection.commit()
 
         return jsonify({'success': False, 'message': mensaje}), 401
@@ -264,11 +268,11 @@ def login():
     finally:
         try:
             cursor.close()
-        except Exception:
+        except:
             pass
         try:
             connection.close()
-        except Exception:
+        except:
             pass
 
 # ==============================
@@ -283,9 +287,15 @@ def logout():
     #app.run(host='127.0.0.1', port=5000, ssl_context='adhoc', debug=True)
 #if __name__ == '__main__':
  #   app.run(debug=True)
-
+with app.app_context():
+    try:
+        
+        print("Conectado correctamente a Supabase")
+    except Exception as e:
+        print("Error de conexión:", e)
+        
 if __name__ == "__main__":
     print("Flask está iniciando correctamente...")
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    app.run(host="0.0.0.0", port=5000, debug=True)
 
 

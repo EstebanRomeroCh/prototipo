@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify, session
 from db import get_db_connection
 import pymysql
 from utils.bitacora import registrar_bitacora
+from psycopg2.extras import RealDictCursor
 
 donantes_bp = Blueprint('donantes_bp', __name__, url_prefix='/api/donantes')
 
@@ -14,7 +15,7 @@ donantes_bp = Blueprint('donantes_bp', __name__, url_prefix='/api/donantes')
 @donantes_bp.route('/tipos', methods=['GET'])
 def obtener_tipos_donante():
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         cursor.execute("SELECT id_tipo, nombre FROM tipo_donante WHERE estado='Activo'")
         resultados = cursor.fetchall()
@@ -49,7 +50,7 @@ def obtener_tipos_donante():
 @donantes_bp.route('/tipos_documento', methods=['GET'])
 def obtener_tipos_documento():
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         cursor.execute("SELECT id_tipo_doc, nombre FROM tipo_documento WHERE estado='Activo'")
         resultados = cursor.fetchall()
@@ -70,7 +71,7 @@ def obtener_tipos_documento():
 @donantes_bp.route('/', methods=['GET'])
 def listar_donantes():
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         cursor.execute("""
             SELECT  
@@ -115,7 +116,7 @@ def crear_donante():
         return jsonify({'success': False, 'message': 'Nombre y tipo de donante son obligatorios'}), 400
 
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         cursor.execute("""
             SELECT * FROM donantes 
@@ -147,8 +148,8 @@ def crear_donante():
 
         cursor.execute("""
             SELECT d.id_donante, d.nombre, td.nombre AS tipo_documento, 
-                   d.numero_documento, t.id_tipo AS tipo_id, t.nombre AS tipo_nombre,
-                   d.correo, d.telefono, d.direccion, d.estado
+                    d.numero_documento, t.id_tipo AS tipo_id, t.nombre AS tipo_nombre,
+                    d.correo, d.telefono, d.direccion, d.estado
             FROM donantes d
             LEFT JOIN tipo_documento td ON d.tipo_doc_id = td.id_tipo_doc
             LEFT JOIN tipo_donante t ON d.tipo_id = t.id_tipo
@@ -183,7 +184,7 @@ def actualizar_donante(id_donante):
         return jsonify({'success': False, 'message': 'Nombre y tipo de donante son obligatorios'}), 400
 
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         cursor.execute("""
             UPDATE donantes
@@ -208,8 +209,8 @@ def actualizar_donante(id_donante):
 
         cursor.execute("""
             SELECT d.id_donante, d.nombre, td.nombre AS tipo_documento, 
-                   d.numero_documento, t.id_tipo AS tipo_id, t.nombre AS tipo_nombre,
-                   d.correo, d.telefono, d.direccion, d.estado
+                    d.numero_documento, t.id_tipo AS tipo_id, t.nombre AS tipo_nombre,
+                    d.correo, d.telefono, d.direccion, d.estado
             FROM donantes d
             LEFT JOIN tipo_documento td ON d.tipo_doc_id = td.id_tipo_doc
             LEFT JOIN tipo_donante t ON d.tipo_id = t.id_tipo
@@ -234,7 +235,7 @@ def actualizar_donante(id_donante):
 @donantes_bp.route('/<int:id_donante>', methods=['GET'])
 def obtener_donante(id_donante):
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         cursor.execute("""
             SELECT  
@@ -273,7 +274,7 @@ def obtener_donante(id_donante):
 @donantes_bp.route('/<int:id_donante>', methods=['DELETE'])
 def eliminar_donante(id_donante):
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         cursor.execute("DELETE FROM donantes WHERE id_donante=%s", (id_donante,))
         id_usuario = session.get("id_usuario")
@@ -308,7 +309,7 @@ def buscar_donantes():
         return jsonify([])
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         cursor.execute("""
             SELECT 

@@ -11,7 +11,7 @@ const tablaCategorias = document
 // IMPORTANTE:
 // tu blueprint ya tiene /api/categorias
 // por eso dejamos la / al final
-const API_CATEGORIAS = "/api/categorias/";
+const API_CATEGORIAS = "/api/categorias";
 
 // ==============================
 // CARGAR TODAS LAS CATEGORÍAS
@@ -106,7 +106,7 @@ formCategoria.addEventListener("submit", async function (e) {
     console.log("Respuesta crear:", data);
 
     if (res.ok && data.success) {
-      agregarFilaCategoria(data.categoria);
+      cargarCategorias(); // recarga todo en vez de usar objeto
 
       formCategoria.reset();
 
@@ -140,7 +140,7 @@ async function eliminarCategoria(btn) {
   if (!confirmacion) return;
 
   try {
-    const res = await fetch(`${API_CATEGORIAS}${id}`, {
+    const res = await fetch(`${API_CATEGORIAS}/${id}`, {
       method: "DELETE",
     });
 
@@ -214,7 +214,7 @@ document
     }
 
     try {
-      const res = await fetch(`${API_CATEGORIAS}${id}`, {
+      const res = await fetch(`${API_CATEGORIAS}/${id}`, {
         method: "PUT",
 
         headers: {

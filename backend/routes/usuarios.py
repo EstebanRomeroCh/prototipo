@@ -3,6 +3,7 @@ from werkzeug.security import generate_password_hash
 from db import get_db_connection
 import re
 from utils.bitacora import registrar_bitacora
+from psycopg2.extras import RealDictCursor
 
 usuarios_bp = Blueprint('usuarios_bp', __name__, url_prefix='/api/usuarios')
 
@@ -24,7 +25,8 @@ def validar_contrasena(contra):
 @usuarios_bp.route('/roles', methods=['GET'])
 def obtener_roles():
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    
 
     cursor.execute("SELECT id_rol, nombre FROM roles")
     roles = cursor.fetchall()
@@ -33,7 +35,6 @@ def obtener_roles():
     conn.close()
 
     return jsonify(roles), 200
-
 
 # ====================================
 # CREAR USUARIO
@@ -62,7 +63,7 @@ def crear_usuario():
         }), 400
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     # Verificar si el correo ya existe
     cursor.execute("SELECT id_usuario FROM usuarios WHERE correo = %s", (correo,))
@@ -112,7 +113,8 @@ def crear_usuario():
 @usuarios_bp.route('/', methods=['GET'])
 def listar_usuarios():
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+
 
     cursor.execute("""
         SELECT 
@@ -151,7 +153,8 @@ def actualizar_usuario(id):
         return jsonify({"success": False, "message": "Contraseña débil"}), 400
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+
 
     # Verificar si el correo ya está registrado por otro usuario
     cursor.execute("SELECT id_usuario FROM usuarios WHERE correo = %s AND id_usuario != %s", (correo, id))
@@ -211,7 +214,7 @@ def cambiar_estado_usuario(id, nuevo_estado):
         return jsonify({"success": False, "message": "Estado inválido"}), 400
 
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     cursor.execute("UPDATE usuarios SET estado = %s WHERE id_usuario = %s", 
                    (nuevo_estado, id))

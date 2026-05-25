@@ -1,19 +1,23 @@
-import pymysql
+from flask_sqlalchemy import SQLAlchemy
+import psycopg2
+from psycopg2.extras import RealDictCursor
+
+db = SQLAlchemy()
 
 def get_db_connection():
     try:
-        connection = pymysql.connect(
-            host='localhost',
-            user='root',
-            password='Es1084734914',
-            db='banco_alimentos',
-            cursorclass=pymysql.cursors.DictCursor
+        connection = psycopg2.connect(
+            host="aws-1-us-west-1.pooler.supabase.com",
+            database="postgres",
+            user="postgres.bbtannkumnuasujehhre",
+            password="Es1084734914",
+            port="5432",
+            cursor_factory=RealDictCursor
         )
 
-        print("✅ Conexión exitosa a MySQL")
+        print("Conectado a Supabase")
         return connection
 
     except Exception as e:
-        print("❌ ERROR AL CONECTAR A MYSQL:")
-        print(e)
+        print("Error conectando:", e)
         return None

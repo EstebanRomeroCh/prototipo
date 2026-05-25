@@ -7,6 +7,7 @@ from datetime import datetime, date
 from decimal import Decimal, InvalidOperation
 from pymysql.err import IntegrityError
 from utils.bitacora import registrar_bitacora
+from psycopg2.extras import RealDictCursor
 
 
 actas_vencimiento_bp = Blueprint(
@@ -78,7 +79,7 @@ def api_salidas_elegibles():
 
     q = (request.args.get("q") or "").strip()  # por si quieres filtrar por ID o texto
     conn = get_db_connection()
-    cur = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         sql = """
@@ -104,8 +105,8 @@ def api_salidas_elegibles():
 
         sql += " ORDER BY s.fecha_salida DESC, s.id_salida DESC"
 
-        cur.execute(sql, params)
-        rows = cur.fetchall() or []
+        cursor.execute(sql, params)
+        rows = cursor.fetchall() or []
 
         items = []
         for r in rows:
@@ -127,7 +128,7 @@ def api_salidas_elegibles():
         print("Error api_salidas_elegibles:", e)
         return jsonify({"success": False, "message": "Error al cargar salidas elegibles"}), 500
     finally:
-        cur.close()
+        cursor.close()
         conn.close()
 
 # =========================
@@ -139,11 +140,11 @@ def api_detalle_salida_para_acta(id_salida):
         return jsonify({"success": False, "message": "Sesión expirada"}), 401
 
     conn = get_db_connection()
-    cur = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         # Cabecera salida + validar que sea baja por vencimiento
-        cur.execute("""
+        cursor.execute("""
             SELECT
                 s.id_salida,
                 s.fecha_salida,
@@ -156,7 +157,7 @@ def api_detalle_salida_para_acta(id_salida):
             WHERE s.id_salida = %s
             LIMIT 1
         """, (id_salida,))
-        salida = cur.fetchone()
+        salida = cursor.fetchone()
 
         if not salida:
             return jsonify({"success": False, "message": "La salida no existe"}), 404
@@ -168,13 +169,13 @@ def api_detalle_salida_para_acta(id_salida):
             return jsonify({"success": False, "message": "La salida está anulada o inactiva."}), 400
 
         # Verificar que NO tenga acta ya
-        cur.execute("SELECT id_acta FROM actas_vencimiento WHERE id_salida=%s LIMIT 1", (id_salida,))
-        ya = cur.fetchone()
+        cursor.execute("SELECT id_acta FROM actas_vencimiento WHERE id_salida=%s LIMIT 1", (id_salida,))
+        ya = cursor.fetchone()
         if ya:
             return jsonify({"success": False, "message": "Esta salida ya tiene un acta creada.", "id_acta": ya["id_acta"]}), 409
 
         # Detalles de salida
-        cur.execute("""
+        cursor.execute("""
             SELECT
                 sd.id_detalle_salida,
                 sd.cantidad_kg,
@@ -192,7 +193,7 @@ def api_detalle_salida_para_acta(id_salida):
             WHERE sd.id_salida = %s
             ORDER BY sd.fecha_vencimiento ASC, p.nombre ASC
         """, (id_salida,))
-        detalles = cur.fetchall() or []
+        detalles = cursor.fetchall() or []
 
         # Normalizar
         total_kg = salida.get("total_peso_kg")
@@ -231,7 +232,7 @@ def api_detalle_salida_para_acta(id_salida):
         print("Error api_detalle_salida_para_acta:", e)
         return jsonify({"success": False, "message": "Error al consultar la salida"}), 500
     finally:
-        cur.close()
+        cursor.close()
         conn.close()
 
 # =========================
@@ -273,13 +274,13 @@ def api_crear_acta():
         return jsonify({"success": False, "message": "No se encontró id_usuario en sesión."}), 401
 
     conn = get_db_connection()
-    cur = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         conn.autocommit(False)
 
         # 1) Validar salida: existe, activa, baja por vencimiento
-        cur.execute("""
+        cursor.execute("""
             SELECT
                 s.id_salida,
                 s.estado,
@@ -289,7 +290,7 @@ def api_crear_acta():
             WHERE s.id_salida=%s
             LIMIT 1
         """, (id_salida,))
-        srow = cur.fetchone()
+        srow = cursor.fetchone()
 
         if not srow:
             raise ValueError("La salida no existe.")
@@ -299,22 +300,22 @@ def api_crear_acta():
             raise ValueError("Solo se permite crear acta para salidas 'Baja por vencimiento'.")
 
         # 2) Validar que no exista acta ya (1 a 1)
-        cur.execute("SELECT id_acta FROM actas_vencimiento WHERE id_salida=%s LIMIT 1", (id_salida,))
-        if cur.fetchone():
+        cursor.execute("SELECT id_acta FROM actas_vencimiento WHERE id_salida=%s LIMIT 1", (id_salida,))
+        if cursor.fetchone():
             raise ValueError("Ya existe un acta para esta salida.")
 
         # 3) Crear cabecera acta
-        cur.execute("""
+        cursor.execute("""
     INSERT INTO actas_vencimiento
         (id_salida, fecha_acta, motivo, creado_por, id_usuario_creador, estado)
     VALUES
         (%s, %s, %s, %s, %s, 'Activo')
         """, (id_salida, fecha_acta, motivo, creado_por, id_usuario))
-        id_acta = cur.lastrowid
+        id_acta = cursor.lastrowid
 
         # 4) Copiar detalles desde salida_detalles -> acta_vencimiento_detalles
         #    (snapshot para impresión y auditoría)
-        cur.execute("""
+        cursor.execute("""
                     
             INSERT INTO acta_vencimiento_detalles
                 (id_acta, id_detalle_salida, id_producto, nombre_producto, fecha_vencimiento, cantidad_kg,
@@ -336,11 +337,11 @@ def api_crear_acta():
         """, (id_acta, id_salida))
 
         # Si por algún motivo la salida no tenía detalles
-        if cur.rowcount == 0:
+        if cursor.rowcount == 0:
             raise ValueError("La salida no tiene detalles. No se puede crear acta.")
         try:
                     registrar_bitacora(
-                        cur,
+                        cursor,
                         id_usuario,
                         "ACTAS_VENCIMIENTO",
                         "CREAR",
@@ -373,7 +374,7 @@ def api_crear_acta():
             conn.autocommit(True)
         except Exception:
             pass
-        cur.close()
+        cursor.close()
         conn.close()
 
 # =========================
@@ -385,10 +386,10 @@ def api_detalle_acta(id_acta):
         return jsonify({"success": False, "message": "Sesión expirada"}), 401
 
     conn = get_db_connection()
-    cur = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
-        cur.execute("""
+        cursor.execute("""
             SELECT
                 av.id_acta,
                 av.id_salida,
@@ -403,12 +404,12 @@ def api_detalle_acta(id_acta):
             WHERE av.id_acta = %s
             LIMIT 1
         """, (id_acta,))
-        acta = cur.fetchone()
+        acta = cursor.fetchone()
 
         if not acta:
             return jsonify({"success": False, "message": "El acta no existe"}), 404
 
-        cur.execute("""
+        cursor.execute("""
             SELECT
                 d.id_detalle_acta,
                 d.id_detalle_salida,
@@ -423,7 +424,7 @@ def api_detalle_acta(id_acta):
             WHERE d.id_acta = %s
             ORDER BY d.fecha_vencimiento ASC, d.nombre_producto ASC
         """, (id_acta,))
-        detalles = cur.fetchall() or []
+        detalles = cursor.fetchall() or []
 
         # Normalizar decimals / fechas
         acta_out = {
@@ -459,7 +460,7 @@ def api_detalle_acta(id_acta):
         print("Error api_detalle_acta:", e)
         return jsonify({"success": False, "message": "Error al obtener detalle del acta"}), 500
     finally:
-        cur.close()
+        cursor.close()
         conn.close()
 
 # =========================
@@ -471,18 +472,18 @@ def api_anular_acta(id_acta):
         return jsonify({"success": False, "message": "Sesión expirada"}), 401
 
     conn = get_db_connection()
-    cur = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
-        cur.execute("SELECT estado FROM actas_vencimiento WHERE id_acta=%s LIMIT 1", (id_acta,))
-        row = cur.fetchone()
+        cursor.execute("SELECT estado FROM actas_vencimiento WHERE id_acta=%s LIMIT 1", (id_acta,))
+        row = cursor.fetchone()
         if not row:
             return jsonify({"success": False, "message": "Acta no encontrada"}), 404
 
         if row.get("estado") == "Anulado":
             return jsonify({"success": True, "message": "El acta ya estaba anulada."})
 
-        cur.execute("""
+        cursor.execute("""
             UPDATE actas_vencimiento
             SET estado='Anulado'
             WHERE id_acta=%s
@@ -496,5 +497,6 @@ def api_anular_acta(id_acta):
         print("Error api_anular_acta:", e)
         return jsonify({"success": False, "message": "Error al anular el acta"}), 500
     finally:
-        cur.close()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        
         conn.close()

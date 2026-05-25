@@ -10,6 +10,7 @@ from openpyxl import Workbook
 from openpyxl.chart import BarChart, Reference
 from openpyxl.chart.label import DataLabelList
 from utils.bitacora import registrar_bitacora
+from psycopg2.extras import RealDictCursor
 # pip install openpyxl
 
 reportes_bp = Blueprint('reportes_bp', __name__)
@@ -74,7 +75,7 @@ def data_reporte_donaciones():
     print("DEBUG REPORTE: desde", fecha_desde, "hasta", fecha_hasta, "producto", filtro_nombre)
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         filtros = [
@@ -206,7 +207,7 @@ def reporte_donaciones_excel():
         fecha_desde = datetime.fromisoformat(fecha_desde_str).date()
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         filtros = [
@@ -449,7 +450,7 @@ def data_reporte_donantes():
         fecha_desde = datetime.fromisoformat(fecha_desde_str).date()
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         filtros = [
@@ -580,7 +581,7 @@ def reporte_donantes_excel():
         fecha_desde = datetime.fromisoformat(fecha_desde_str).date()
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         filtros = [
@@ -799,7 +800,7 @@ def data_reporte_categorias():
         fecha_desde = datetime.fromisoformat(fecha_desde_str).date()
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         filtros = [
@@ -933,7 +934,7 @@ def reporte_categorias_excel():
         fecha_desde = datetime.fromisoformat(fecha_desde_str).date()
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         filtros = [
@@ -1162,7 +1163,7 @@ def data_reporte_general():
         fecha_desde = datetime.fromisoformat(fecha_desde_str).date()
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         filtros = [
@@ -1321,7 +1322,7 @@ def reporte_general_excel():
         fecha_desde = datetime.fromisoformat(fecha_desde_str).date()
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         filtros = [
@@ -1542,7 +1543,7 @@ def data_reporte_monetarias():
         fecha_desde = datetime.fromisoformat(fecha_desde_str).date()
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         filtros = [
@@ -1675,7 +1676,7 @@ def reporte_monetarias_excel():
         fecha_desde = datetime.fromisoformat(fecha_desde_str).date()
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         filtros = [

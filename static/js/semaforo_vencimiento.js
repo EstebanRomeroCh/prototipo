@@ -16,7 +16,11 @@ function formatFecha(fechaStr) {
   if (!fechaStr) return "-";
   const d = new Date(fechaStr);
   if (isNaN(d.getTime())) return fechaStr;
-  return d.toLocaleDateString("es-CO", { day: "2-digit", month: "2-digit", year: "numeric" });
+  return d.toLocaleDateString("es-CO", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
 }
 
 // días restantes = fecha_venc - hoy
@@ -78,20 +82,21 @@ async function cargarSemaforo(q = "") {
     if (!resp.ok) throw new Error("HTTP " + resp.status);
 
     const data = await resp.json();
-    if (!data.success) throw new Error(data.message || "Error en API inventario");
+    if (!data.success)
+      throw new Error(data.message || "Error en API inventario");
 
     // Solo productos con stock > 0
     const productos = (data.productos || [])
-      .filter(p => Number(p.cantidad_total || 0) > 0)
-      .map(p => {
+      .filter((p) => Number(p.cantidad_total || 0) > 0)
+      .map((p) => {
         const fv = p.proximo_vencimiento || null;
         const dias = diasRestantes(fv);
         return { ...p, _dias: dias };
       })
       // Orden: más urgentes primero (sin fecha al final)
       .sort((a, b) => {
-        const da = (a._dias === null) ? 999999 : a._dias;
-        const db = (b._dias === null) ? 999999 : b._dias;
+        const da = a._dias === null ? 999999 : a._dias;
+        const db = b._dias === null ? 999999 : b._dias;
         if (da !== db) return da - db;
         return Number(b.cantidad_total || 0) - Number(a.cantidad_total || 0);
       });
@@ -108,7 +113,7 @@ async function cargarSemaforo(q = "") {
 
     // Pintar tabla
     let html = "";
-    productos.forEach(p => {
+    productos.forEach((p) => {
       const dias = p._dias;
       const estilo = estiloSemaforo(dias);
 
@@ -130,7 +135,6 @@ async function cargarSemaforo(q = "") {
 
     // Gráfica: Top 5 más urgentes (solo con fecha válida)
     renderChart(productos);
-
   } catch (err) {
     console.error("Error semáforo:", err);
     tbody.innerHTML = `
@@ -153,11 +157,11 @@ function renderChart(productos) {
 
   // Top 5 más urgentes (solo con fecha válida)
   let datos = (productos || [])
-    .filter(p => p && p.nombre && p._dias !== null)
-    .map(p => ({
+    .filter((p) => p && p.nombre && p._dias !== null)
+    .map((p) => ({
       nombre: p.nombre,
       total: Number(p.cantidad_total || 0),
-      dias: p._dias
+      dias: p._dias,
     }))
     .sort((a, b) => {
       if (a.dias !== b.dias) return a.dias - b.dias; // más urgente primero
@@ -165,8 +169,8 @@ function renderChart(productos) {
     })
     .slice(0, 5);
 
-  const labels = datos.map(d => d.nombre);
-  const values = datos.map(d => d.total);
+  const labels = datos.map((d) => d.nombre);
+  const values = datos.map((d) => d.total);
 
   // destruir si existe
   if (__chart) {
@@ -182,14 +186,16 @@ function renderChart(productos) {
     type: "bar",
     data: {
       labels: labels,
-      datasets: [{
-        label: "Kilos en inventario (kg)",
-        data: values,
-        borderWidth: 1,
-        backgroundColor: "rgba(25, 135, 84, 0.6)",
-        borderColor: "rgba(25, 135, 84, 1)",
-        barThickness: 40
-      }]
+      datasets: [
+        {
+          label: "Kilos en inventario (kg)",
+          data: values,
+          borderWidth: 1,
+          backgroundColor: "rgba(25, 135, 84, 0.6)",
+          borderColor: "rgba(25, 135, 84, 1)",
+          barThickness: 40,
+        },
+      ],
     },
     options: {
       responsive: true,
@@ -200,9 +206,9 @@ function renderChart(productos) {
           ticks: {
             callback: function (value) {
               return formatKg(value) + " kg";
-            }
-          }
-        }
+            },
+          },
+        },
       },
       plugins: {
         legend: { display: false },
@@ -210,11 +216,11 @@ function renderChart(productos) {
           callbacks: {
             label: function (ctx) {
               return `${formatKg(ctx.parsed.y)} kg`;
-            }
-          }
-        }
-      }
-    }
+            },
+          },
+        },
+      },
+    },
   });
 }
 
@@ -250,14 +256,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-const btnExcelVenc = document.getElementById("btnExcelVenc");
-if (btnExcelVenc) {
-  btnExcelVenc.addEventListener("click", () => {
-    const q = (input?.value || "").trim();
-    window.location.href = "/inventario/export/vencimientos.xlsx?q=" + encodeURIComponent(q);
-  });
-}
-
+  const btnExcelVenc = document.getElementById("btnExcelVenc");
+  if (btnExcelVenc) {
+    btnExcelVenc.addEventListener("click", () => {
+      const q = (input?.value || "").trim();
+      window.location.href =
+        "/inventario/export/vencimientos.xlsx?q=" + encodeURIComponent(q);
+    });
+  }
 
   cargarSemaforo("");
 });

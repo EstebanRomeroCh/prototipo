@@ -1,5 +1,7 @@
 from flask import Blueprint, render_template, session
 from db import get_db_connection
+from psycopg2.extras import RealDictCursor
+
 
 comprobante_monetaria_bp = Blueprint(
     'comprobante_monetaria_bp',
@@ -14,7 +16,7 @@ def comprobante_monetaria(id_donacion):
         return "Sesión expirada. Inicie sesión nuevamente."
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         # ============================

@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, session
 from db import get_db_connection
 from mysql.connector import Error
 from utils.bitacora import registrar_bitacora
+from psycopg2.extras import RealDictCursor
 
 unidades_bp = Blueprint('unidades_bp', __name__, url_prefix='/api/unidades')
 
@@ -15,7 +16,7 @@ def listar_unidades():
 
     try:
         conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
 
         cursor.execute("""
             SELECT id_unidad, nombre, abreviatura, factor_kg, estado
@@ -45,7 +46,7 @@ def listar_unidades_activas():
 
     try:
         conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
 
         cursor.execute("""
             SELECT id_unidad, nombre, abreviatura, factor_kg
@@ -90,7 +91,7 @@ def listar_unidades_activas():
 def desactivar_unidad(id_unidad):
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
 
         cursor.execute("""
             UPDATE unidades_medida
@@ -131,7 +132,7 @@ def desactivar_unidad(id_unidad):
 def activar_unidad(id_unidad):
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
 
         cursor.execute("""
             UPDATE unidades_medida

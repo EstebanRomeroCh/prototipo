@@ -1,6 +1,7 @@
 # routes/tipo_entrada.py
 from flask import Blueprint, jsonify, session
 from db import get_db_connection
+from psycopg2.extras import RealDictCursor
 
 tipo_entrada_bp = Blueprint('tipo_entrada_bp', __name__, url_prefix='/api/tipo_entrada')
 
@@ -13,7 +14,7 @@ def listar_tipos_entrada_activas():
         return jsonify({'success': False, 'message': 'Sesión expirada'}), 401
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         cursor.execute("""
             SELECT id_tipo_entrada, nombre

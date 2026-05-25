@@ -4,6 +4,7 @@ from flask import Blueprint, render_template, session, redirect, url_for, jsonif
 from database import get_db_connection
 import pymysql
 from utils.bitacora import registrar_bitacora
+from psycopg2.extras import RealDictCursor
 
 parroquias_bp = Blueprint(
     "parroquias_bp",
@@ -38,7 +39,7 @@ def api_tipos_organizacion():
         return jsonify({"success": False, "message": "Sesión expirada"}), 401
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         cursor.execute("""
@@ -76,7 +77,7 @@ def api_tipos_documento():
         return jsonify({"success": False, "message": "Sesión expirada"}), 401
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         cursor.execute("""
@@ -120,7 +121,7 @@ def api_listar_parroquias():
     q = request.args.get("q", "").strip()
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         filtros = ["p.estado = 'Activo'"]
@@ -212,7 +213,7 @@ def api_crear_parroquia():
         }), 400
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         cursor.execute("""
@@ -317,7 +318,7 @@ def api_actualizar_parroquia(id_parroquia):
         }), 400
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         # Verificar que exista
@@ -409,7 +410,7 @@ def api_eliminar_parroquia(id_parroquia):
         return jsonify({"success": False, "message": "Sesión expirada"}), 401
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         cursor.execute(

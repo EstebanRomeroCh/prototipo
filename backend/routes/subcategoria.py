@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 from db import get_db_connection
 from utils.bitacora import registrar_bitacora
+from psycopg2.extras import RealDictCursor
 
 subcategorias_bp = Blueprint('subcategorias_bp', __name__, url_prefix='/api/subcategorias')
 
@@ -10,9 +11,21 @@ subcategorias_bp = Blueprint('subcategorias_bp', __name__, url_prefix='/api/subc
 @subcategorias_bp.route('/', methods=['GET'])
 def listar_subcategorias():
     conn = get_db_connection()
-    cursor = conn.cursor()  # <- sin DictCursor
+    cursor = conn.cursor(cursor_factory=RealDictCursor)  # <- sin DictCursor
     try:
-        cursor.execute("SELECT id_subcategoria, nombre, descripcion, id_categoria, estado FROM subcategorias")
+        cursor.execute("""
+        SELECT
+            s.id_subcategoria,
+            s.nombre,
+            s.descripcion,
+            s.id_categoria,
+            c.nombre AS categoria_nombre,
+            s.estado
+        FROM subcategorias s
+        INNER JOIN categorias c
+            ON s.id_categoria = c.id_categoria
+    """)
+        
         subcategorias = cursor.fetchall()  # Esto devuelve tuplas
         return jsonify(subcategorias)
     except Exception as e:
@@ -28,9 +41,22 @@ def listar_subcategorias():
 @subcategorias_bp.route('/<int:id_subcategoria>', methods=['GET'])
 def obtener_subcategoria(id_subcategoria):
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
-        cursor.execute("SELECT id_subcategoria, nombre, descripcion, id_categoria, estado FROM subcategorias WHERE id_subcategoria=%s", (id_subcategoria,))
+        cursor.execute("""
+        SELECT
+            s.id_subcategoria,
+            s.nombre,
+            s.descripcion,
+            s.id_categoria,
+            c.nombre AS categoria_nombre,
+            s.estado
+        FROM subcategorias s
+        INNER JOIN categorias c
+            ON s.id_categoria = c.id_categoria
+        WHERE s.id_subcategoria=%s
+    """, (id_subcategoria,))
+        
         subcategoria = cursor.fetchone()
         if not subcategoria:
             return jsonify({'success': False, 'message': 'Subcategoría no encontrada'}), 404
@@ -57,20 +83,25 @@ def crear_subcategoria():
         return jsonify({'success': False, 'message': 'Nombre y categoría padre son obligatorios'}), 400
 
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         # Validar duplicados exactos ignorando mayúsculas/minúsculas
+        
         cursor.execute("SELECT nombre FROM subcategorias")
-        nombres_existentes = [row[0].lower() for row in cursor.fetchall()]
+        
+        nombres_existentes = [row['nombre'].lower() for row in cursor.fetchall()]
+        
         if nombre.lower() in nombres_existentes:
             return jsonify({'success': False, 'message': f'Ya existe una subcategoría con ese nombre'}), 400
-
-        cursor.execute(
-            "INSERT INTO subcategorias (nombre, descripcion, id_categoria, estado) VALUES (%s, %s, %s, %s)",
-            (nombre, descripcion, id_categoria, estado)
-        )
+            
+            cursor.execute("""
+            INSERT INTO subcategorias (nombre, descripcion, id_categoria, estado)
+            VALUES (%s, %s, %s, %s)
+            RETURNING id_subcategoria
+        """, (nombre, descripcion, id_categoria, estado))
+        nuevo_id = cursor.fetchone()['id_subcategoria']
         conn.commit()
-        nuevo_id = cursor.lastrowid
+
 
         id_usuario = session.get("id_usuario")
         if id_usuario:
@@ -85,7 +116,20 @@ def crear_subcategoria():
             )
             conn.commit()
 
-        cursor.execute("SELECT id_subcategoria, nombre, descripcion, id_categoria, estado FROM subcategorias WHERE id_subcategoria=%s", (nuevo_id,))
+            cursor.execute("""
+    SELECT
+        s.id_subcategoria,
+        s.nombre,
+        s.descripcion,
+        s.id_categoria,
+        c.nombre AS categoria_nombre,
+        s.estado
+    FROM subcategorias s
+    INNER JOIN categorias c
+        ON s.id_categoria = c.id_categoria
+    WHERE s.id_subcategoria=%s
+""", (nuevo_id,))
+
         subcategoria = cursor.fetchone()
 
         return jsonify({'success': True, 'subcategoria': subcategoria}), 201
@@ -109,24 +153,25 @@ def actualizar_subcategoria(id_subcategoria):
     estado = data.get('estado', 'Activo')
 
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         cursor.execute("SELECT id_subcategoria FROM subcategorias WHERE id_subcategoria=%s", (id_subcategoria,))
         if not cursor.fetchone():
             return jsonify({'success': False, 'message': 'Subcategoría no encontrada'}), 404
 
         cursor.execute("SELECT nombre FROM subcategorias WHERE id_subcategoria != %s", (id_subcategoria,))
-        nombres_existentes = [row[0].lower() for row in cursor.fetchall()]
+        nombres_existentes = [row['nombre'].lower() for row in cursor.fetchall()]
         if nombre.lower() in nombres_existentes:
             return jsonify({'success': False, 'message': 'Ya existe otra subcategoría con ese nombre'}), 400
 
         cursor.execute("""
-            UPDATE subcategorias
-            SET nombre=%s, descripcion=%s, id_categoria=%s, estado=%s
-            WHERE id_subcategoria=%s
-        """, (nombre, descripcion, id_categoria, estado, id_subcategoria))
+    UPDATE subcategorias
+    SET nombre=%s, descripcion=%s, id_categoria=%s, estado=%s
+    WHERE id_subcategoria=%s
+""", (nombre, descripcion, id_categoria, estado, id_subcategoria))
+        
+        
         conn.commit()
-
          # Bitácora
         id_usuario = session.get("id_usuario")
         if id_usuario:
@@ -141,7 +186,20 @@ def actualizar_subcategoria(id_subcategoria):
             )
             conn.commit()
 
-        cursor.execute("SELECT id_subcategoria, nombre, descripcion, id_categoria, estado FROM subcategorias WHERE id_subcategoria=%s", (id_subcategoria,))
+        cursor.execute("""
+    SELECT
+        s.id_subcategoria,
+        s.nombre,
+        s.descripcion,
+        s.id_categoria,
+        c.nombre AS categoria_nombre,
+        s.estado
+    FROM subcategorias s
+    INNER JOIN categorias c
+        ON s.id_categoria = c.id_categoria
+    WHERE s.id_subcategoria=%s
+""", (id_subcategoria,))
+        
         subcategoria = cursor.fetchone()
         return jsonify({'success': True, 'subcategoria': subcategoria})
     except Exception as e:
@@ -158,7 +216,7 @@ def actualizar_subcategoria(id_subcategoria):
 @subcategorias_bp.route('/<int:id_subcategoria>', methods=['DELETE'])
 def eliminar_subcategoria(id_subcategoria):
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         cursor.execute("SELECT id_producto FROM productos WHERE id_subcategoria=%s", (id_subcategoria,))
         productos = cursor.fetchall()

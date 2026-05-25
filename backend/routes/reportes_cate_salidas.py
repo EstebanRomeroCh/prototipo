@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request, session
 from database import get_db_connection
 from datetime import datetime, timedelta
 from utils.bitacora import registrar_bitacora
+from psycopg2.extras import RealDictCursor
 
 reportes_cat_bp = Blueprint('reportes_cat_bp', __name__)
 
@@ -24,7 +25,7 @@ def data_reporte_categorias():
         fecha_desde = datetime.fromisoformat(fecha_desde_str).date()
 
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         sql = """

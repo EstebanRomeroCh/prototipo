@@ -3,6 +3,8 @@ from flask import Blueprint, request, jsonify, session
 from db import get_db_connection
 from decimal import Decimal, InvalidOperation
 from utils.bitacora import registrar_bitacora
+from psycopg2.extras import RealDictCursor
+
 
 productos_bp = Blueprint('productos_bp', __name__, url_prefix='/api/productos')
 
@@ -45,7 +47,7 @@ def listar_productos():
         return jsonify({'success': False, 'message': 'Sesión expirada'}), 401
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         cursor.execute("""
             SELECT 
@@ -90,7 +92,7 @@ def obtener_producto(id_producto):
         return jsonify({'success': False, 'message': 'Sesión expirada'}), 401
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         cursor.execute("""
@@ -163,7 +165,7 @@ def crear_producto():
         return jsonify({'success': False, 'message': 'Los valores numéricos no son válidos'}), 400
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         # 1) Evitar productos con NOMBRE EXACTO en la misma subcategoría
         cursor.execute("SELECT nombre FROM productos WHERE id_subcategoria=%s", (id_subcategoria,))
@@ -257,7 +259,7 @@ def actualizar_producto(id_producto):
         return jsonify({'success': False, 'message': 'Valores numéricos inválidos'}), 400
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         # Verificar que exista
         cursor.execute("SELECT * FROM productos WHERE id_producto=%s", (id_producto,))
@@ -327,7 +329,7 @@ def eliminar_producto(id_producto):
         return jsonify({'success': False, 'message': 'Sesión expirada'}), 401
 
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         cursor.execute("DELETE FROM productos WHERE id_producto=%s", (id_producto,))
@@ -372,7 +374,7 @@ def buscar_productos():
         return jsonify([])
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         cursor.execute("""

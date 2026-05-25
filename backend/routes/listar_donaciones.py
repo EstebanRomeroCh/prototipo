@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request, session
 from db import get_db_connection
 from utils.bitacora import registrar_bitacora
+from psycopg2.extras import RealDictCursor
 
 
 listar_bp = Blueprint("listar_bp", __name__, url_prefix="/api/donaciones")
@@ -11,7 +12,7 @@ listar_bp = Blueprint("listar_bp", __name__, url_prefix="/api/donaciones")
 @listar_bp.route("/productos")
 def listar_donaciones_producto():
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     cursor.execute("""
         SELECT 
@@ -54,7 +55,7 @@ def listar_donaciones_producto():
 @listar_bp.route("/monetaria")
 def listar_donaciones_monetaria():
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     cursor.execute("""
         SELECT 
@@ -96,7 +97,7 @@ def listar_donaciones_monetaria():
 def obtener_donacion_producto(id_entrada):
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         # Cabecera (sin responsable porque ya NO existe en la tabla)
@@ -181,7 +182,7 @@ def obtener_donacion_producto(id_entrada):
 def obtener_tipos_entrada():
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     cursor.execute("""
         SELECT id_tipo_entrada, nombre 
@@ -202,7 +203,7 @@ def filtrar_donaciones():
     tipo = request.args.get("tipo")  # viene el id_tipo_entrada o vacío
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     query = """
         SELECT 

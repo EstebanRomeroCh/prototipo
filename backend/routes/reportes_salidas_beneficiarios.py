@@ -15,6 +15,7 @@ from decimal import Decimal, InvalidOperation
 from io import BytesIO
 from openpyxl import Workbook
 from openpyxl.chart import BarChart, Reference
+from psycopg2.extras import RealDictCursor
 
 
 reportes_salidas_benef_bp = Blueprint("reportes_salidas_benef_bp", __name__)
@@ -117,7 +118,7 @@ def _decimal_or_zero(x):
 
 def cargar_tipos_salida():
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         cursor.execute("""
             SELECT id_tipo_salida, nombre
@@ -143,14 +144,14 @@ def api_tipos_salida_reportes():
         return jsonify({"success": False, "message": "Sesión expirada"}), 401
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         cursor.execute("""
             SELECT id_tipo_salida, nombre
             FROM tipo_salida
             WHERE estado IS NULL
-               OR LOWER(TRIM(estado))='activo'
-               OR TRIM(estado)='1'
+                OR LOWER(TRIM(estado))='activo'
+                OR TRIM(estado)='1'
             ORDER BY nombre
         """)
         rows = cursor.fetchall() or []
@@ -201,7 +202,7 @@ def data_reporte_salidas_beneficiarios():
     fecha_desde, fecha_hasta = parse_fechas(desde_str, hasta_str)
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         db_name = _get_db_name(cursor)
@@ -426,7 +427,7 @@ def reporte_salidas_beneficiarios_excel():
     fecha_desde, fecha_hasta = parse_fechas(desde_str, hasta_str)
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         db_name = _get_db_name(cursor)

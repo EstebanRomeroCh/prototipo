@@ -1,6 +1,7 @@
 # routes/comprobante_donacion.py
 from flask import Blueprint, render_template, session
 from db import get_db_connection
+from psycopg2.extras import RealDictCursor
 
 comprobante_donacion_bp = Blueprint('comprobante_donacion_bp', __name__, url_prefix='/donaciones')
 
@@ -12,7 +13,7 @@ def comprobante_donacion(id_entrada):
         return "Sesión expirada. Inicie sesión de nuevo."
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         # ✅ Encabezado de la entrada, incluyendo totales

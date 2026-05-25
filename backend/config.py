@@ -1,6 +1,2 @@
 class Config:
-    MYSQL_HOST = 'localhost'
-    MYSQL_USER = 'root'
-    MYSQL_PASSWORD = 'Es1084734914'
-    MYSQL_DB = 'banco_alimentos'
-    SECRET_KEY = 'clave_super_secreta'
+    DATABASE_URL = "postgresql://postgres:Es1084734914@db.bbtannkumnuasujehhre.supabase.co:5432/postgres"

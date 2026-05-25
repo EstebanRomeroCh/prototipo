@@ -3,6 +3,7 @@ from flask import Blueprint, jsonify, request, session
 from database import get_db_connection
 from utils.bitacora import registrar_bitacora
 import pymysql
+from psycopg2.extras import RealDictCursor
 
 tipo_documento_bp = Blueprint('tipo_documento_bp', __name__, url_prefix='/api/tipo_documento')
 
@@ -18,7 +19,7 @@ def obtener_tipos_documento():
         return jsonify({"success": False, "message": "Sesión expirada"}), 401
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         cursor.execute("""
             SELECT id_tipo_doc, nombre, descripcion, estado
@@ -67,7 +68,7 @@ def agregar_tipo_documento():
         return jsonify({"success": False, "message": "El campo 'nombre' es obligatorio"}), 400
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         # Duplicado exacto por nombre (ignorando mayúsculas/espacios)
@@ -129,7 +130,7 @@ def actualizar_tipo_documento(id_tipo_doc):
         return jsonify({"success": False, "message": "El campo 'nombre' es obligatorio"}), 400
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         # Existe?
@@ -188,7 +189,7 @@ def eliminar_tipo_documento(id_tipo_doc):
         return jsonify({"success": False, "message": "Sesión expirada"}), 401
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         # Existe?

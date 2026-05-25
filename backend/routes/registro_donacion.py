@@ -4,6 +4,7 @@ from db import get_db_connection
 from datetime import datetime, timedelta
 from decimal import Decimal
 from utils.bitacora import registrar_bitacora
+from psycopg2.extras import RealDictCursor
 
 import os
 import json
@@ -127,7 +128,7 @@ def registrar_donacion():
 
     # Abrir conexión
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         # -----------------------------

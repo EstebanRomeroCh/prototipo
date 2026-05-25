@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify, session
 from database import get_db_connection
 import pymysql
 from utils.bitacora import registrar_bitacora
+from psycopg2.extras import RealDictCursor
+
 
 tipos_organizacion_bp = Blueprint(
     "tipos_organizacion_bp",
@@ -49,7 +51,7 @@ def listar_tipos_organizacion():
     estado = (request.args.get("estado", "Activo") or "").strip()
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         sql = """
@@ -110,7 +112,7 @@ def crear_tipo_organizacion():
         return jsonify({"success": False, "message": "El nombre del tipo de organización es obligatorio."}), 400
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         # Duplicado por nombre (ignora mayúsculas/espacios)
@@ -175,7 +177,7 @@ def actualizar_tipo_organizacion(id_tipo):
         return jsonify({"success": False, "message": "El nombre del tipo de organización es obligatorio."}), 400
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         fila = fila_por_id(cursor, id_tipo)
@@ -235,7 +237,7 @@ def eliminar_tipo_organizacion(id_tipo):
         return jsonify({"success": False, "message": "Sesión expirada"}), 401
 
     conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         fila = fila_por_id(cursor, id_tipo)
