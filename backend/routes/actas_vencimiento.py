@@ -275,6 +275,7 @@ def api_crear_acta():
 
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
+    
 
     try:
         conn.autocommit(False)

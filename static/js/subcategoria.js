@@ -7,8 +7,8 @@ const formSubcategoria = document.getElementById("formSubcategoria");
 const tablaSubcategorias = document
   .getElementById("tablaSubcategorias")
   .querySelector("tbody");
-const API_SUBCATEGORIAS = "/api/subcategorias";
-const API_CATEGORIAS = "/api/categorias";
+const API_SUBCATEGORIAS = "/api/subcategorias/";
+const API_CATEGORIAS = "/api/categorias/";
 
 // ==============================
 // CARGAR TODAS LAS SUBCATEGORÍAS

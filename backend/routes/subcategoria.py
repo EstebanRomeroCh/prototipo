@@ -71,8 +71,9 @@ def obtener_subcategoria(id_subcategoria):
 # ==============================
 # CREAR SUBCATEGORÍA
 # ==============================
-@subcategorias_bp.route('/', methods=['POST'])
+@subcategorias_bp.route('/subcategorias', methods=['POST'])
 def crear_subcategoria():
+    
     data = request.get_json()
     nombre = data.get('nombre')
     descripcion = data.get('descripcion', '')
@@ -86,22 +87,27 @@ def crear_subcategoria():
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         # Validar duplicados exactos ignorando mayúsculas/minúsculas
-        
-        cursor.execute("SELECT nombre FROM subcategorias")
-        
-        nombres_existentes = [row['nombre'].lower() for row in cursor.fetchall()]
-        
-        if nombre.lower() in nombres_existentes:
-            return jsonify({'success': False, 'message': f'Ya existe una subcategoría con ese nombre'}), 400
+        cursor.execute("""
             
-            cursor.execute("""
-            INSERT INTO subcategorias (nombre, descripcion, id_categoria, estado)
-            VALUES (%s, %s, %s, %s)
-            RETURNING id_subcategoria
+            SELECT id_subcategoria
+            FROM subcategorias
+            WHERE LOWER(nombre) = LOWER(%s)
+            AND id_categoria = %s
+        """, (nombre, id_categoria))
+        
+        existente = cursor.fetchone()
+        
+        print("EXISTENTE:", existente)
+        
+        if existente:
+            return jsonify({'success': False, 'message': 'Ya existe una subcategoría con ese nombre en la misma categoría'}), 400
+            
+        cursor.execute("""
+        INSERT INTO subcategorias (nombre, descripcion, id_categoria, estado)
+        VALUES (%s, %s, %s, %s)
+        RETURNING id_subcategoria
         """, (nombre, descripcion, id_categoria, estado))
         nuevo_id = cursor.fetchone()['id_subcategoria']
-        conn.commit()
-
 
         id_usuario = session.get("id_usuario")
         if id_usuario:
@@ -114,25 +120,26 @@ def crear_subcategoria():
                 tabla_afectada="subcategorias",
                 id_registro=nuevo_id
             )
-            conn.commit()
-
-            cursor.execute("""
-    SELECT
-        s.id_subcategoria,
-        s.nombre,
-        s.descripcion,
-        s.id_categoria,
-        c.nombre AS categoria_nombre,
-        s.estado
-    FROM subcategorias s
-    INNER JOIN categorias c
-        ON s.id_categoria = c.id_categoria
-    WHERE s.id_subcategoria=%s
-""", (nuevo_id,))
-
+        conn.commit()
+        cursor.execute("""
+        SELECT
+            s.id_subcategoria,
+            s.nombre,
+            s.descripcion,
+            s.id_categoria,
+            c.nombre AS categoria_nombre,
+            s.estado
+        FROM subcategorias s
+        INNER JOIN categorias c
+            ON s.id_categoria = c.id_categoria
+        WHERE s.id_subcategoria=%s
+    """, (nuevo_id,))
         subcategoria = cursor.fetchone()
-
-        return jsonify({'success': True, 'subcategoria': subcategoria}), 201
+        return jsonify({
+            'success': True,
+            'subcategoria': subcategoria
+        }), 201
+    
     except Exception as e:
         conn.rollback()
         print("Error crear_subcategoria:", e)

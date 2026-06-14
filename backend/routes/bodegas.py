@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 from db import get_db_connection
 from utils.bitacora import registrar_bitacora
+from psycopg2.extras import RealDictCursor
 
 bodegas_bp = Blueprint('bodegas', __name__)
 
@@ -8,7 +9,7 @@ bodegas_bp = Blueprint('bodegas', __name__)
 @bodegas_bp.route('/api/bodegas', methods=['GET'])
 def obtener_bodegas():
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     cursor.execute("SELECT id_bodega, nombre_bodega, ubicacion, descripcion FROM bodegas")
     bodegas = cursor.fetchall()
     cursor.close()
@@ -19,7 +20,7 @@ def obtener_bodegas():
 @bodegas_bp.route('/api/bodegas/listar', methods=['GET'])
 def listar_bodegas():
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     cursor.execute("SELECT id_bodega, nombre_bodega FROM bodegas")
     bodegas = cursor.fetchall()
     cursor.close()
