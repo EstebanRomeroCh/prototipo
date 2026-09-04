@@ -337,14 +337,14 @@ def api_actualizar_fundacion(id_fundaciones):
 
     try:
         cursor.execute(
-            "SELECT id_fundaciones FROM fundacionesWHERE id_fundaciones = %s",
+            "SELECT id_fundaciones FROM fundaciones WHERE id_fundaciones = %s",
             (id_fundaciones,)
         )
         if not cursor.fetchone():
             return jsonify({"success": False, "message": "La fundación no existe."}), 404
 
         cursor.execute("""
-            UPDATE fundacioines
+            UPDATE fundaciones
             SET id_tipo_organizacion = %s,
                 tipo_doc_id          = %s,
                 nombre               = %s,
@@ -381,7 +381,7 @@ def api_actualizar_fundacion(id_fundaciones):
                 modulo="FUNDACIONES",
                 accion="EDITAR",
                 descripcion=f"Actualizó fundación '{nombre}' (ID {id_fundaciones}).",
-                tabla_afectada="fundacioines",
+                tabla_afectada="fundaciones",
                 id_registro=id_fundaciones
             )
 
@@ -409,14 +409,14 @@ def api_eliminar_fundacion(id_fundaciones):
 
     try:
         cursor.execute(
-            "SELECT id_fundaciones FROM fundacionesWHERE id_fundaciones = %s",
+            "SELECT id_fundaciones FROM fundaciones WHERE id_fundaciones = %s",
             (id_fundaciones,)
         )
         if not cursor.fetchone():
             return jsonify({"success": False, "message": "La fundación no existe."}), 404
 
         cursor.execute("""
-            UPDATE fundacioines
+            UPDATE fundaciones
             SET estado = 'Inactivo'
             WHERE id_fundaciones = %s
         """, (id_fundaciones,))
@@ -428,7 +428,7 @@ def api_eliminar_fundacion(id_fundaciones):
                 modulo="FUNDACIONES",
                 accion="ANULAR",
                 descripcion=f"Marcó como inactiva la fundación ID {id_fundaciones}.",
-                tabla_afectada="fundacioines",
+                tabla_afectada="fundaciones",
                 id_registro=id_fundaciones
             )
         conn.commit()

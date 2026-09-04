@@ -5,6 +5,7 @@ from flask import Blueprint, request, jsonify, render_template, redirect, url_fo
 from db import get_db_connection
 from utils.bitacora import registrar_bitacora
 import pymysql
+from psycopg2 import errorcodes
 from psycopg2.extras import RealDictCursor
 
 tipo_donante_bp = Blueprint(
@@ -63,19 +64,26 @@ def listar_tipo_donante():
 # Crear nuevo tipo de donante vía JSON
 @tipo_donante_bp.route('/api/tipo_donante', methods=['POST'])
 def crear_tipo_donante():
-    data = request.get_json()
-    nombre = data.get('nombre')
+    data = request.get_json() or {}
+    nombre = (data.get('nombre') or '').strip()
     descripcion = data.get('descripcion', '')
+
+    if not nombre:
+        return jsonify({'success': False, 'message': 'El nombre es obligatorio'}), 400
 
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         cursor.execute(
-            "INSERT INTO tipo_donante (nombre, descripcion) VALUES (%s, %s)",
+            """
+            INSERT INTO tipo_donante (nombre, descripcion)
+            VALUES (%s, %s)
+            RETURNING id_tipo
+            """,
             (nombre, descripcion)
         )
+        nuevo_id = cursor.fetchone()['id_tipo']
         conn.commit()
-        nuevo_id = cursor.lastrowid
     except Exception as e:
         conn.rollback()
         cursor.close()
@@ -129,7 +137,7 @@ def eliminar_tipo_donante(id_tipo):
         mensaje_error = str(e)
 
         # Detectar el error 1451 (violación de clave foránea)
-        if "1451" in mensaje_error:
+        if getattr(e, 'pgcode', None) == errorcodes.FOREIGN_KEY_VIOLATION:
             mensaje = "No se puede eliminar este tipo de donante porque tiene donantes asociados."
         else:
             mensaje = "Error al eliminar el tipo de donante."

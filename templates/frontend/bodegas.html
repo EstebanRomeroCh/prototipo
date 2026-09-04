@@ -94,11 +94,12 @@
           <label for="nombreBodega">Nombre de la bodega</label>
           <input type="text" id="nombreBodega" placeholder="Nombre de la bodega" required />
 
-          <label for="direccionBodega">Filas de Stand</label>
-          <input id="direccionBodega" placeholder="5" rows="3"></input>
+          <label for="direccionBodega">Ubicación</label>
+          <input id="direccionBodega" placeholder="Ubicación de la bodega" rows="3"></input>
 
-          <label for="descripcionBodega">Descripción</label>
-          <input id="descripcionBodega" placeholder="Descripción de la bodega" rows="3"></input>
+          <label for="capacidadBodega">Capacidad</label>
+          <input type="number" id="capacidadBodega" class="form-control" placeholder="Capacidad de la bodega" min="0"
+            step="1" required>
 
           <button type="submit" class="btn btn-success mt-3 w-100">Guardar</button>
         </form>
@@ -109,8 +110,8 @@
             <tr>
               <th>ID</th>
               <th>Nombre</th>
-              <th>Fila de Stand</th>
-              <th>Descripción</th>
+              <th>Ubicación</th>
+              <th>Capacidad</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -123,31 +124,66 @@
     <div class="modal fade" id="modalActualizarBodega" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">
+
           <div class="modal-header bg-success text-white">
             <h5 class="modal-title">Actualizar Bodega</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal">
+            </button>
           </div>
 
           <div class="modal-body">
+
             <form id="formActualizarBodega">
 
               <input type="hidden" id="idBodegaModal">
 
-              <label>Nombre de la bodega</label>
+              <!-- NOMBRE -->
+              <label for="nombreBodegaModal">
+                Nombre de la bodega
+              </label>
+
               <input type="text" id="nombreBodegaModal" class="form-control" required>
 
-              <label>Fila de Stand</label>
-              <input id="ubicacionBodegaModal" class="form-control" rows="3"></input>
+              <!-- UBICACIÓN -->
+              <label for="ubicacionBodegaModal" class="mt-3">
+                Ubicación
+              </label>
 
-              <label>Descripción</label>
-              <input id="descripcionBodegaModal" class="form-control" rows="3"></input>
+              <input type="text" id="ubicacionBodegaModal" class="form-control" required>
 
-              <div class="d-flex justify-content-end mt-3">
-                <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancelar</button>
-                <button type="submit" class="btn btn-success">Actualizar</button>
+              <!-- CAPACIDAD -->
+              <label for="capacidadBodegaModal" class="mt-3">
+                Capacidad
+              </label>
+
+              <input type="number" id="capacidadBodegaModal" class="form-control" min="0" step="0.01" required>
+
+              <!-- ESTADO -->
+              <label for="estadoBodegaModal" class="mt-3">
+                Estado
+              </label>
+
+              <select id="estadoBodegaModal" class="form-select" required>
+                <option value="Activo">Activo</option>
+                <option value="Inactivo">Inactivo</option>
+              </select>
+
+              <!-- BOTONES -->
+              <div class="d-flex justify-content-end mt-4">
+
+                <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">
+                  Cancelar
+                </button>
+
+                <button type="submit" class="btn btn-success">
+                  Actualizar
+                </button>
+
               </div>
 
             </form>
+
           </div>
 
         </div>
@@ -165,13 +201,11 @@ z-index: 999;">
 
     <script src="/static/js/resaltar.js"></script>
     <script src="/static/js/time.js"></script>
-
     <script src="/static/js/bodegas.js"></script>
-    <script>
-      resaltar()
-    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
     <script src="/static/js/notificacion.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 

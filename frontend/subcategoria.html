@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <title>Gestión de Subcategorías</title>
@@ -9,33 +10,46 @@
       margin: 20px;
       background-color: #f5f5f5;
     }
-    h1, h2 {
+
+    h1,
+    h2 {
       color: #2c3e50;
     }
-    form, table {
+
+    form,
+    table {
       background-color: #fff;
       padding: 15px;
       margin-bottom: 30px;
       border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
-    input, select {
+
+    input,
+    select {
       margin-bottom: 10px;
       padding: 8px;
       width: 100%;
       box-sizing: border-box;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
     }
-    table, th, td {
+
+    table,
+    th,
+    td {
       border: 1px solid #ccc;
     }
-    th, td {
+
+    th,
+    td {
       padding: 10px;
       text-align: left;
     }
+
     button {
       padding: 10px 15px;
       background-color: #2980b9;
@@ -44,11 +58,13 @@
       border-radius: 4px;
       cursor: pointer;
     }
+
     button:hover {
       background-color: #1c5980;
     }
   </style>
 </head>
+
 <body>
 
   <h1>Registrar Nueva Subcategoría</h1>
@@ -90,7 +106,7 @@
     const tablaSubcategorias = document.getElementById('tablaSubcategorias').querySelector('tbody');
 
     let idSubcategoria = 1;
-    let editandoSubcategoria = null;
+    let subcategoriaEnEdicion = null;
 
     // Llenar el select con categorías
     function cargarCategorias() {
@@ -104,7 +120,7 @@
 
     cargarCategorias();
 
-    formSubcategoria.addEventListener('submit', function(e) {
+    formSubcategoria.addEventListener('submit', function (e) {
       e.preventDefault();
 
       const categoria = categoriaSelect.value;
@@ -113,11 +129,11 @@
 
       if (!categoria || !nombre || !descripcion) return;
 
-      if (editandoSubcategoria) {
-        editandoSubcategoria.querySelector('.col-categoria').textContent = categoria;
-        editandoSubcategoria.querySelector('.col-nombre').textContent = nombre;
-        editandoSubcategoria.querySelector('.col-descripcion').textContent = descripcion;
-        editandoSubcategoria = null;
+      if (subcategoriaEnEdicion) {
+        subcategoriaEnEdicion.querySelector('.col-categoria').textContent = categoria;
+        subcategoriaEnEdicion.querySelector('.col-nombre').textContent = nombre;
+        subcategoriaEnEdicion.querySelector('.col-descripcion').textContent = descripcion;
+        subcategoriaEnEdicion = null;
       } else {
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -148,9 +164,10 @@
       document.getElementById('descripcionSubcategoria').value = row.querySelector('.col-descripcion').textContent;
       categoriaSelect.value = row.querySelector('.col-categoria').textContent;
 
-      editandoSubcategoria = row;
+      subcategoriaEnEdicion = row;
     }
   </script>
 
 </body>
+
 </html>

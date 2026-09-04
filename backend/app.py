@@ -7,7 +7,6 @@ import os
 from werkzeug.security import check_password_hash  # 👈 AQUÍ
 from psycopg2.extras import RealDictCursor
 from db import get_db_connection
-from database import get_db_connection
 
 
 

@@ -2,7 +2,6 @@
 
 from flask import Blueprint, jsonify, request, session, render_template, redirect, url_for
 from database import get_db_connection
-import pymysql
 from datetime import datetime, date
 from decimal import Decimal, InvalidOperation
 from pymysql.err import IntegrityError

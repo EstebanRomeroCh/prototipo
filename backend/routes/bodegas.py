@@ -10,12 +10,24 @@ bodegas_bp = Blueprint('bodegas', __name__)
 def obtener_bodegas():
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
-    cursor.execute("SELECT id_bodega, nombre_bodega, ubicacion, descripcion FROM bodegas")
+
+    cursor.execute("""
+        SELECT 
+            id_bodega,
+            nombre_bodega,
+            ubicacion,
+            capacidad,
+            estado
+        FROM bodegas
+        ORDER BY id_bodega ASC
+    """)
+
     bodegas = cursor.fetchall()
+
     cursor.close()
     conn.close()
-    return jsonify(bodegas)
 
+    return jsonify(bodegas)
 # LISTAR BODEGAS (para selects)
 @bodegas_bp.route('/api/bodegas/listar', methods=['GET'])
 def listar_bodegas():
@@ -63,35 +75,97 @@ def crear_bodega():
 # ACTUALIZAR BODEGA
 @bodegas_bp.route('/api/bodegas/<int:id>', methods=['PUT'])
 def actualizar_bodega(id):
-    data = request.json
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    conn = None
+    cursor = None
 
-    cursor.execute("""
-        UPDATE bodegas
-        SET nombre_bodega = %s, ubicacion = %s, descripcion = %s
-        WHERE id_bodega = %s
-    """, (data['nombre_bodega'], data['ubicacion'], data['descripcion'], id))
     try:
-        id_usuario = session.get("id_usuario")
-        if id_usuario:
-            registrar_bitacora(
-                cursor,
-                id_usuario,
-                "BODEGAS",
-                "EDITAR",
-                f"Actualizó bodega #{id}: {data.get('nombre_bodega','')}",
-                "bodegas",
-                id
-            )
+        data = request.get_json()
+
+        nombre_bodega = data.get('nombre_bodega', '').strip()
+        ubicacion = data.get('ubicacion', '').strip()
+        capacidad = data.get('capacidad')
+        estado = data.get('estado', '').strip()
+        
+        if not nombre_bodega:
+            return jsonify({
+                "error": "El nombre de la bodega es obligatorio"
+            }), 400
+
+        if capacidad in (None, ""):
+            return jsonify({
+                "error": "La capacidad es obligatoria"
+            }), 400
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE bodegas
+            SET
+                nombre_bodega = %s,
+                ubicacion = %s,
+                capacidad = %s,
+                estado = %s
+            WHERE id_bodega = %s
+        """, (
+            nombre_bodega,
+            ubicacion,
+            capacidad,
+            estado,
+            id
+        ))
+
+        # Verificar si realmente existe la bodega
+        if cursor.rowcount == 0:
+            conn.rollback()
+
+            return jsonify({
+                "error": "No se encontró la bodega"
+            }), 404
+
+        # Bitácora
+        try:
+            id_usuario = session.get("id_usuario")
+
+            if id_usuario:
+                registrar_bitacora(
+                    cursor,
+                    id_usuario,
+                    "BODEGAS",
+                    "EDITAR",
+                    f"Actualizó bodega #{id}: {nombre_bodega}",
+                    "bodegas",
+                    id
+                )
+
+        except Exception as e:
+            print("⚠️ Bitácora (no bloqueante):", e)
+
+        conn.commit()
+
+        return jsonify({
+            "message": "Bodega actualizada correctamente"
+        }), 200
+
     except Exception as e:
-        print("Bitácora (no bloqueante):", e)
 
-    conn.commit()
-    cursor.close()
-    conn.close()
+        if conn:
+            conn.rollback()
 
-    return jsonify({"message": "Bodega actualizada correctamente"})
+        print("❌ ERROR ACTUALIZANDO BODEGA:", e)
+
+        return jsonify({
+            "error": "No se pudo actualizar la bodega",
+            "detalle": str(e)
+        }), 500
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conn:
+            conn.close()
 
 # ELIMINAR BODEGA
 @bodegas_bp.route('/api/bodegas/<int:id>', methods=['DELETE'])

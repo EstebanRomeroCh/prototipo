@@ -20,25 +20,33 @@ async function cargarBodegas() {
 
 function renderTabla() {
   const tbody = document.querySelector("#tablaBodegas tbody");
+
   tbody.innerHTML = "";
 
   bodegas.forEach((b) => {
     const tr = document.createElement("tr");
-    tr.innerHTML = `
-            <td>${b.id_bodega}</td>
-            <td>${b.nombre_bodega}</td>
-            <td>${b.ubicacion || "—"}</td>
-            <td>${b.descripcion || "—"}</td>
-            <td>
-                <button class="btn btn-sm btn-success me-2" onclick="abrirModalActualizar(${b.id_bodega})">
-    <i class="bi bi-pencil-fill"></i>
-</button>
-<button class="btn btn-sm btn-danger" onclick="eliminarBodega(${b.id_bodega})">
-    <i class="bi bi-trash-fill"></i>
-</button>
 
-                </td>
-        `;
+    tr.innerHTML = `
+      <td>${b.id_bodega}</td>
+      <td>${b.nombre_bodega}</td>
+      <td>${b.ubicacion || "—"}</td>
+      <td>${b.capacidad ?? "—"}</td>
+      <td>${b.estado || "—"}</td>
+      <td>
+        <button 
+          class="btn btn-sm btn-success me-2"
+          onclick="abrirModalActualizar(${b.id_bodega})">
+          <i class="bi bi-pencil-fill"></i>
+        </button>
+
+        <button 
+          class="btn btn-sm btn-danger"
+          onclick="eliminarBodega(${b.id_bodega})">
+          <i class="bi bi-trash-fill"></i>
+        </button>
+      </td>
+    `;
+
     tbody.appendChild(tr);
   });
 }
@@ -80,60 +88,106 @@ document.getElementById("formBodega").addEventListener("submit", async (e) => {
 // ======================
 function abrirModalActualizar(id) {
   const bodega = bodegas.find((b) => b.id_bodega === id);
+
+  if (!bodega) {
+    console.error("No se encontró la bodega con ID:", id);
+    return;
+  }
+
   filaEditando = id;
 
   document.getElementById("idBodegaModal").value = bodega.id_bodega;
-  document.getElementById("nombreBodegaModal").value = bodega.nombre_bodega;
+  document.getElementById("nombreBodegaModal").value =
+    bodega.nombre_bodega || "";
+
   document.getElementById("ubicacionBodegaModal").value =
     bodega.ubicacion || "";
-  document.getElementById("descripcionBodegaModal").value =
-    bodega.descripcion || "";
+
+  document.getElementById("capacidadBodegaModal").value =
+    bodega.capacidad || "";
 
   const modal = new bootstrap.Modal(
     document.getElementById("modalActualizarBodega"),
   );
+
   modal.show();
 }
-
 // ======================
 // ACTUALIZAR
 // ======================
-document
-  .getElementById("formActualizarBodega")
-  .addEventListener("submit", async (e) => {
+
+const formActualizarBodega = document.getElementById("formActualizarBodega");
+
+if (formActualizarBodega) {
+  formActualizarBodega.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const id = document.getElementById("idBodegaModal").value;
+
     const nombre_bodega = document
       .getElementById("nombreBodegaModal")
       .value.trim();
+
     const ubicacion = document
       .getElementById("ubicacionBodegaModal")
       .value.trim();
-    const descripcion = document
-      .getElementById("descripcionBodegaModal")
-      .value.trim();
+
+    const capacidad = document.getElementById("capacidadBodegaModal").value;
+
+    const estado = document.getElementById("estadoBodegaModal").value;
+
+    if (!nombre_bodega) {
+      swal("Error", "El nombre de la bodega es obligatorio", "error");
+      return;
+    }
+
+    if (capacidad === "") {
+      swal("Error", "La capacidad es obligatoria", "error");
+      return;
+    }
 
     try {
       const res = await fetch(`${API_BODEGAS}/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombre_bodega, ubicacion, descripcion }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nombre_bodega,
+          ubicacion,
+          capacidad,
+          estado,
+        }),
       });
 
       const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.detalle || data.error || "Error al actualizar");
+      }
+
       swal("Éxito", data.message, "success");
 
-      cargarBodegas();
-      bootstrap.Modal.getInstance(
-        document.getElementById("modalActualizarBodega"),
-      ).hide();
+      await cargarBodegas();
+
+      const modalElemento = document.getElementById("modalActualizarBodega");
+
+      const modal = bootstrap.Modal.getInstance(modalElemento);
+
+      if (modal) {
+        modal.hide();
+      }
     } catch (error) {
       console.error("Error al actualizar:", error);
-      swal("Error", "No se pudo actualizar la bodega", "error");
+
+      swal(
+        "Error",
+        "No se pudo actualizar la bodega: " + error.message,
+        "error",
+      );
     }
   });
-
+}
 // ======================
 // ELIMINAR
 // ======================

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <title>Gestión de Productos</title>
@@ -9,33 +10,46 @@
       margin: 20px;
       background-color: #f5f5f5;
     }
-    h1, h2 {
+
+    h1,
+    h2 {
       color: #2c3e50;
     }
-    form, table {
+
+    form,
+    table {
       background-color: #fff;
       padding: 15px;
       margin-bottom: 30px;
       border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
-    input, select {
+
+    input,
+    select {
       margin-bottom: 10px;
       padding: 8px;
       width: 100%;
       box-sizing: border-box;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
     }
-    table, th, td {
+
+    table,
+    th,
+    td {
       border: 1px solid #ccc;
     }
-    th, td {
+
+    th,
+    td {
       padding: 10px;
       text-align: left;
     }
+
     button {
       padding: 10px 15px;
       background-color: #2980b9;
@@ -44,11 +58,13 @@
       border-radius: 4px;
       cursor: pointer;
     }
+
     button:hover {
       background-color: #1c5980;
     }
   </style>
 </head>
+
 <body>
 
   <h1>Registrar Nuevo Producto</h1>
@@ -138,13 +154,13 @@
       subcategoriaSelect.disabled = false;
     }
 
-    categoriaSelect.addEventListener('change', function() {
+    categoriaSelect.addEventListener('change', function () {
       cargarSubcategorias(this.value);
     });
 
     cargarCategorias();
 
-    formProducto.addEventListener('submit', function(e) {
+    formProducto.addEventListener('submit', function (e) {
       e.preventDefault();
 
       const categoriaId = categoriaSelect.value;
@@ -233,4 +249,6 @@
   </script>
 
 </body>
+<script src="producto.js"></script>
+
 </html>

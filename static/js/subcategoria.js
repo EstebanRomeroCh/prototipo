@@ -1,7 +1,7 @@
 // ==============================
 // CONFIGURACIÓN INICIAL
 // ==============================
-let editandoSubcategoria = null;
+let subcategoriaEnEdicion = null;
 let categorias = []; // Para almacenar las categorías cargadas
 const formSubcategoria = document.getElementById("formSubcategoria");
 const tablaSubcategorias = document
@@ -134,7 +134,7 @@ async function abrirModalEditarSubcategoria(id) {
     document.getElementById("categoriaSubcategoriaModal").value =
       sub.id_categoria;
 
-    editandoSubcategoria = Array.from(tablaSubcategorias.rows).find(
+    subcategoriaEnEdicion = Array.from(tablaSubcategorias.rows).find(
       (row) => row.querySelector(".col-id").textContent == id,
     );
 
@@ -182,12 +182,12 @@ document
       const data = await res.json();
 
       if (res.ok && data.success) {
-        editandoSubcategoria.querySelector(".col-nombre").textContent =
+        subcategoriaEnEdicion.querySelector(".col-nombre").textContent =
           data.subcategoria.nombre;
-        editandoSubcategoria.querySelector(".col-descripcion").textContent =
+        subcategoriaEnEdicion.querySelector(".col-descripcion").textContent =
           data.subcategoria.descripcion;
 
-        editandoSubcategoria.querySelector(".col-id-categoria").textContent =
+        subcategoriaEnEdicion.querySelector(".col-id-categoria").textContent =
           data.subcategoria.categoria_nombre;
 
         const modal = bootstrap.Modal.getInstance(
@@ -200,7 +200,7 @@ document
           "Subcategoría actualizada correctamente",
           "success",
         );
-        editandoSubcategoria = null;
+        subcategoriaEnEdicion = null;
       } else {
         swal(
           "Error",

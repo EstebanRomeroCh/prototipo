@@ -205,7 +205,7 @@ def eliminar_tipo_documento(id_tipo_doc):
             }), 400
 
         cursor.execute(
-            "SELECT 1 FROM fundacioines WHERE tipo_doc_id=%s LIMIT 1",
+            "SELECT 1 FROM fundaciones WHERE tipo_doc_id=%s LIMIT 1",
             (id_tipo_doc,)
         )
         if cursor.fetchone():
