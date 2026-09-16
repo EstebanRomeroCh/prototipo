@@ -28,3 +28,4 @@ gunicorn
 psycopg2-binary
 PyMySQL
 Flask-SQLAlchemy
+openpyxl
