@@ -1,4 +1,5 @@
-class SupabaseConfig:
-    SQLALCHEMY_DATABASE_URI = "postgresql://postgres.bbtannkumnuasujehhre:Es1084734914@aws-1-us-west-1.pooler.supabase.com:5432/postgres"
+import os
 
+class SupabaseConfig:
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
